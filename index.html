@@ -252,6 +252,9 @@ input{font-family:'Barlow',sans-serif;}
       <button class="week-btn" onclick="changeWeek(1)">›</button>
     </div>
     <button class="btn btn-outline" onclick="clearWeek()">Clear Week</button>
+    <button class="btn btn-outline" onclick="exportData()">⬇ Export</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">⬆ Import</button>
     <button class="btn btn-green" onclick="saveAll()">Save Progress</button>
   </div>
 </div>
@@ -771,29 +774,33 @@ function calcNextWeight(ex, setData, week) {
   const targetReps = parseTargetReps(ex.reps);
   let completedSets = 0, totalSets = ex.sets;
 
+  // Find highest weight actually used across all sets
+  let maxWeightUsed = 0, anyWeightLogged = false;
   for(let s=0;s<totalSets;s++){
     const reps = parseInt(setData[`${ex.id}_s${s}_reps`]||'0');
+    const wt = parseFloat(setData[`${ex.id}_s${s}_wt`]||'0');
     if(reps >= targetReps) completedSets++;
+    if(wt > 0){ anyWeightLogged = true; maxWeightUsed = Math.max(maxWeightUsed, wt); }
   }
 
-  let inc = ex.compound ? 5 : 2.5;
+  // Base next week off actual weight lifted, fall back to suggested
+  const baseWeight = anyWeightLogged ? maxWeightUsed : suggestNum;
+  const inc = ex.compound ? 5 : 2.5;
   let flag, nextWt;
 
   if(completedSets === totalSets) {
-    nextWt = suggestNum + inc;
+    nextWt = baseWeight + inc;
     flag = 'up';
   } else if(completedSets >= Math.ceil(totalSets * 0.75)) {
-    nextWt = suggestNum;
+    nextWt = baseWeight;
     flag = 'same';
   } else {
-    nextWt = suggestNum - inc;
+    nextWt = Math.max(0, baseWeight - inc);
     flag = 'down';
   }
 
   const overrideVal = setData[`${ex.id}_override`];
-  const finalWt = overrideVal ? parseFloat(overrideVal) : nextWt;
-
-  return {nextWt, flag, completedSets, totalSets, override: overrideVal||''};
+  return {nextWt, baseWeight, flag, completedSets, totalSets, override: overrideVal||''};
 }
 
 function buildExerciseCard(ex, dayKey, week) {
@@ -867,15 +874,15 @@ function renderNextWeekBox(ex, data) {
 
   const flagClass = result.flag==='up'?'flag-up':result.flag==='down'?'flag-down':'flag-same';
   const flagText = result.flag==='up'?'↑ Increase':result.flag==='down'?'↓ Drop weight':'→ Hold weight';
-  const suggestNum = typeof ex.suggest==='number'?ex.suggest:parseFloat(ex.suggest)||0;
-  const inc = ex.compound?5:2.5;
-  const auto = result.flag==='up'?suggestNum+inc:result.flag==='down'?suggestNum-inc:suggestNum;
+  const auto = result.nextWt;
+  const baseLabel = result.baseWeight !== (typeof ex.suggest==='number'?ex.suggest:parseFloat(ex.suggest)||0)
+    ? ` (from ${result.baseWeight} lbs lifted)` : '';
 
   box.innerHTML = `
     <div class="nwb-title">Next Week Suggestion</div>
     <div class="nwb-row">
       <div class="nwb-calc">${result.completedSets}/${result.totalSets} sets completed →</div>
-      <span class="nwb-suggest">${auto} lbs</span>
+      <span class="nwb-suggest">${auto} lbs</span><span style="font-size:10px;color:var(--muted);margin-left:4px;">${baseLabel}</span>
       <span class="nwb-flag ${flagClass}">${flagText}</span>
       <div class="nwb-override-wrap">
         <span class="nwb-override-label">Override:</span>
@@ -929,10 +936,10 @@ function updateDaySummary(dayKey, exercises, data) {
       if(r&&w) vol+=r*w;
     }
   });
-  const pfx = dayKey.replace('-','');
-  const ce=document.getElementById(`${pfx}-complete`);
-  const te=document.getElementById(`${pfx}-total`);
-  const ve=document.getElementById(`${pfx}-vol`);
+  // IDs are like "p1-d1-complete" so use dayKey directly
+  const ce=document.getElementById(`${dayKey}-complete`);
+  const te=document.getElementById(`${dayKey}-total`);
+  const ve=document.getElementById(`${dayKey}-vol`);
   if(ce) ce.textContent=completeSets;
   if(te) te.textContent=totalSets;
   if(ve) ve.textContent=vol>0?vol.toLocaleString():0;
@@ -1047,6 +1054,81 @@ function showDay(phase, day) {
   parent.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
   dayEl.classList.add('active');
   event.currentTarget.classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// EXPORT / IMPORT
+// ─────────────────────────────────────────────
+function exportData() {
+  const allData = {};
+  for(let w = 1; w <= 10; w++) {
+    const d = loadData(w);
+    if(Object.keys(d).length > 0) allData[`week_${w}`] = d;
+  }
+  if(Object.keys(allData).length === 0) {
+    alert('No data logged yet to export.');
+    return;
+  }
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    program: '10-Week Workout Tracker',
+    data: allData
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `workout-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Visual feedback
+  const btn = [...document.querySelectorAll('.btn-outline')].find(b => b.textContent.includes('Export'));
+  if(btn){ const orig=btn.textContent; btn.textContent='✓ Exported'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)'; setTimeout(()=>{ btn.textContent=orig; btn.style.borderColor=''; btn.style.color=''; }, 2000); }
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if(!payload.data) throw new Error('Invalid backup file format.');
+
+      const weekCount = Object.keys(payload.data).length;
+      if(!confirm(`Import backup from ${payload.exportedAt ? new Date(payload.exportedAt).toLocaleDateString() : 'unknown date'}?
+
+This will restore data for ${weekCount} week(s). Any existing data for those weeks will be overwritten.`)) {
+        event.target.value = '';
+        return;
+      }
+
+      let imported = 0;
+      for(const [weekKey, weekData] of Object.entries(payload.data)) {
+        const weekNum = parseInt(weekKey.replace('week_', ''));
+        if(weekNum >= 1 && weekNum <= 10) {
+          saveData(weekNum, weekData);
+          imported++;
+        }
+      }
+
+      // Reload current week display
+      appData = loadData(currentWeek);
+      renderAllExercises();
+
+      // Visual feedback
+      const btn = [...document.querySelectorAll('.btn-outline')].find(b => b.textContent.includes('Import'));
+      if(btn){ const orig=btn.textContent; btn.textContent=`✓ ${imported} wk(s) restored`; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)'; setTimeout(()=>{ btn.textContent=orig; btn.style.borderColor=''; btn.style.color=''; }, 2500); }
+
+    } catch(err) {
+      alert('Failed to import: ' + err.message + '\nMake sure you are using a valid backup file.');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ─────────────────────────────────────────────
