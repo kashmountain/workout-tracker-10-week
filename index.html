@@ -1,7 +1,3 @@
-Read 78039 chars
-Applied 26/27 patches
-MISSED:
-  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +5,7 @@ MISSED:
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Workout Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg:#f0f2f5; --s1:#ffffff; --s2:#e8ecf0; --s3:#dde3ea;
@@ -24,6 +21,14 @@ MISSED:
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
 input{font-family:'Barlow',sans-serif;}
+
+/* ── SYNC STATUS ── */
+#sync-status{position:fixed;bottom:16px;right:16px;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;z-index:999;transition:opacity .4s;opacity:0;pointer-events:none;}
+#sync-status.show{opacity:1;}
+#sync-status.saving{background:#fdefd4;color:var(--amber);border:1px solid var(--amber);}
+#sync-status.saved{background:var(--green-d);color:var(--green);border:1px solid var(--green);}
+#sync-status.error{background:#fde8e8;color:var(--red);border:1px solid var(--red);}
+#sync-status.loading{background:var(--blue-d);color:var(--blue);border:1px solid var(--blue);}
 
 /* ── HEADER ── */
 .hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;}
@@ -82,7 +87,6 @@ input{font-family:'Barlow',sans-serif;}
 .ex-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:border-color .15s;}
 .ex-card:hover{border-color:var(--border2);}
 .ex-card.expanded{border-color:var(--border2);}
-
 .ex-header{padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
 .ex-expand-btn{width:22px;height:22px;border-radius:4px;border:1px solid var(--border2);background:var(--s2);color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .15s;}
 .ex-card.expanded .ex-expand-btn{background:var(--s3);border-color:var(--green);color:var(--green);}
@@ -95,8 +99,6 @@ input{font-family:'Barlow',sans-serif;}
 .meta-pill.reps{color:var(--text);}
 .meta-pill.rest{color:var(--muted);}
 .meta-pill.suggest{color:var(--amber);background:var(--amber-m);}
-
-/* status indicators on header */
 .ex-status{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--muted);}
 .ex-status.complete{background:var(--green);}
 .ex-status.partial{background:var(--amber);}
@@ -105,25 +107,12 @@ input{font-family:'Barlow',sans-serif;}
 /* ── SET ROWS ── */
 .ex-sets{border-top:1px solid var(--border);padding:10px 14px;display:none;}
 .ex-card.expanded .ex-sets{display:block;}
-
 .sets-grid-header{display:grid;grid-template-columns:60px 1fr 1fr 80px;gap:6px;margin-bottom:6px;padding:0 2px;}
 .sgh{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:center;}
 .sgh:first-child{text-align:left;}
-
 .set-row{display:grid;grid-template-columns:60px 1fr 1fr 80px;gap:6px;margin-bottom:5px;align-items:center;}
 .set-label{font-size:11px;font-weight:700;color:var(--dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px;}
-.set-input{
-  background:var(--s2);
-  border:1px solid var(--border);
-  border-radius:4px;
-  padding:5px 8px;
-  font-size:12px;
-  color:var(--text);
-  width:100%;
-  text-align:center;
-  transition:border-color .15s;
-  font-family:'Barlow',sans-serif;
-}
+.set-input{background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-size:12px;color:var(--text);width:100%;text-align:center;transition:border-color .15s;font-family:'Barlow',sans-serif;}
 .set-input:focus{outline:none;border-color:var(--green);background:var(--s3);}
 .set-input.weight-input{color:var(--amber);border-color:rgba(176,104,0,.3);background:#fffaf2;}
 .set-input.weight-input:focus{border-color:var(--amber);background:#fff8e8;}
@@ -139,17 +128,7 @@ input{font-family:'Barlow',sans-serif;}
 .nwb-suggest{font-size:13px;font-weight:700;color:var(--green);margin-right:4px;}
 .nwb-override-wrap{display:flex;align-items:center;gap:6px;margin-left:auto;}
 .nwb-override-label{font-size:11px;color:var(--muted);}
-.nwb-override{
-  width:80px;
-  background:#fffaf2;
-  border:1px solid var(--amber);
-  border-radius:4px;
-  padding:4px 8px;
-  font-size:12px;
-  color:var(--amber);
-  text-align:center;
-  font-family:'Barlow',sans-serif;
-}
+.nwb-override{width:80px;background:#fffaf2;border:1px solid var(--amber);border-radius:4px;padding:4px 8px;font-size:12px;color:var(--amber);text-align:center;font-family:'Barlow',sans-serif;}
 .nwb-override:focus{outline:none;}
 .nwb-flag{font-size:11px;padding:2px 7px;border-radius:3px;font-weight:600;}
 .flag-up{background:var(--green-m);color:var(--green);}
@@ -219,7 +198,6 @@ input{font-family:'Barlow',sans-serif;}
 .pri{font-size:13px;flex-shrink:0;}
 .prt{font-size:11px;color:var(--dim);line-height:1.5;}
 .prt strong{color:var(--text);}
-
 .prog-table{width:100%;border-collapse:collapse;}
 .prog-table th{padding:5px 9px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;background:var(--s2);border-bottom:1px solid var(--border);}
 .prog-table td{padding:5px 9px;border-bottom:1px solid var(--border);font-size:11px;color:var(--dim);}
@@ -242,6 +220,8 @@ input{font-family:'Barlow',sans-serif;}
 </style>
 </head>
 <body>
+
+<div id="sync-status">Saving…</div>
 
 <!-- HEADER -->
 <div class="hdr">
@@ -324,47 +304,10 @@ input{font-family:'Barlow',sans-serif;}
     <div class="dtab d3" onclick="showDay('p1','d3')">Day 3 — Upper B</div>
     <div class="dtab d4" onclick="showDay('p1','d4')">Day 4 — Lower B</div>
   </div>
-
-  <div class="dpanel active" id="p1-d1">
-    <div class="day-summary">
-      <div class="ds-item"><div class="ds-val green" id="p1-d1-complete">0</div><div class="ds-label">Sets Done</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val blue" id="p1-d1-total">0</div><div class="ds-label">Total Sets</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val amber" id="p1-d1-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div>
-    </div>
-    <div id="exercises-p1-d1"></div>
-  </div>
-  <div class="dpanel" id="p1-d2">
-    <div class="day-summary">
-      <div class="ds-item"><div class="ds-val green" id="p1-d2-complete">0</div><div class="ds-label">Sets Done</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val blue" id="p1-d2-total">0</div><div class="ds-label">Total Sets</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val amber" id="p1-d2-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div>
-    </div>
-    <div id="exercises-p1-d2"></div>
-  </div>
-  <div class="dpanel" id="p1-d3">
-    <div class="day-summary">
-      <div class="ds-item"><div class="ds-val green" id="p1-d3-complete">0</div><div class="ds-label">Sets Done</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val blue" id="p1-d3-total">0</div><div class="ds-label">Total Sets</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val amber" id="p1-d3-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div>
-    </div>
-    <div id="exercises-p1-d3"></div>
-  </div>
-  <div class="dpanel" id="p1-d4">
-    <div class="day-summary">
-      <div class="ds-item"><div class="ds-val green" id="p1-d4-complete">0</div><div class="ds-label">Sets Done</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val blue" id="p1-d4-total">0</div><div class="ds-label">Total Sets</div></div>
-      <div class="ds-divider"></div>
-      <div class="ds-item"><div class="ds-val amber" id="p1-d4-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div>
-    </div>
-    <div id="exercises-p1-d4"></div>
-  </div>
+  <div class="dpanel active" id="p1-d1"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="p1-d1-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="p1-d1-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="p1-d1-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-p1-d1"></div></div>
+  <div class="dpanel" id="p1-d2"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="p1-d2-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="p1-d2-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="p1-d2-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-p1-d2"></div></div>
+  <div class="dpanel" id="p1-d3"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="p1-d3-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="p1-d3-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="p1-d3-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-p1-d3"></div></div>
+  <div class="dpanel" id="p1-d4"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="p1-d4-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="p1-d4-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="p1-d4-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-p1-d4"></div></div>
 </div>
 
 <!-- ===== PHASE 2 ===== -->
@@ -391,8 +334,6 @@ input{font-family:'Barlow',sans-serif;}
     <div><div class="pb-title">Phase 3 — Peak</div><div class="pb-desc">5 days/week. Strength focus on main lifts, volume peaks in Weeks 9–10. Use the week selector below to navigate.</div></div>
     <div class="pb-tag">Weeks 7–10 · 5 Days</div>
   </div>
-
-  <!-- Internal week selector -->
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Week:</div>
     <div style="display:flex;gap:4px;">
@@ -499,6 +440,75 @@ input{font-family:'Barlow',sans-serif;}
 </div><!-- /content -->
 
 <script>
+// ─────────────────────────────────────────────
+// SUPABASE INIT
+// ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://qzmbbcpjkmzacxbptiny.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable__lWRDOMyS33kGebhdTvHkw_xkowYyPG';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUserId = null;
+
+async function initAuth() {
+  // Try to restore existing session
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    currentUserId = session.user.id;
+  } else {
+    // Sign in anonymously — creates a persistent identity for this device
+    const { data, error } = await db.auth.signInAnonymously();
+    if (error) { console.error('Auth error:', error); return; }
+    currentUserId = data.user.id;
+  }
+}
+
+// ─────────────────────────────────────────────
+// SYNC STATUS UI
+// ─────────────────────────────────────────────
+let syncTimer = null;
+function showSync(type, text) {
+  const el = document.getElementById('sync-status');
+  el.className = `show ${type}`;
+  el.textContent = text;
+  clearTimeout(syncTimer);
+  if (type === 'saved') {
+    syncTimer = setTimeout(() => { el.className = ''; }, 2000);
+  }
+}
+
+// ─────────────────────────────────────────────
+// DATA — SUPABASE READS / WRITES
+// ─────────────────────────────────────────────
+async function loadData(week) {
+  if (!currentUserId) return {};
+  try {
+    const { data, error } = await db
+      .from('workout_data')
+      .select('data')
+      .eq('user_id', currentUserId)
+      .eq('week', week)
+      .single();
+    if (error || !data) return {};
+    return data.data || {};
+  } catch(e) { return {}; }
+}
+
+async function saveData(week, data) {
+  if (!currentUserId) return;
+  showSync('saving', '⟳ Saving…');
+  try {
+    const { error } = await db
+      .from('workout_data')
+      .upsert(
+        { user_id: currentUserId, week, data, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,week' }
+      );
+    if (error) { showSync('error', '✗ Save failed'); console.error(error); }
+    else { showSync('saved', '✓ Saved'); }
+  } catch(e) { showSync('error', '✗ Save failed'); }
+}
+
 // ─────────────────────────────────────────────
 // DATA
 // ─────────────────────────────────────────────
@@ -730,23 +740,10 @@ const EXERCISES = {
 };
 
 // ─────────────────────────────────────────────
-// STATE & STORAGE
+// STATE
 // ─────────────────────────────────────────────
 let currentWeek = 1;
 let appData = {};
-
-function storageKey(week) { return `workout_w${week}`; }
-
-function loadData(week) {
-  try {
-    const raw = localStorage.getItem(storageKey(week));
-    return raw ? JSON.parse(raw) : {};
-  } catch(e) { return {}; }
-}
-
-function saveData(week, data) {
-  try { localStorage.setItem(storageKey(week), JSON.stringify(data)); } catch(e) {}
-}
 
 function getPhaseForWeek(w) {
   if(w<=3) return 'p1';
@@ -765,58 +762,49 @@ function parseTargetReps(repsStr) {
   return m ? parseInt(m[1]) : 5;
 }
 
-function calcNextWeight(ex, setData, week) {
+function calcNextWeight(ex, setData) {
   const suggestRaw = ex.suggest;
   if(typeof suggestRaw === 'string' && (suggestRaw==='BW' || suggestRaw.startsWith('+'))) return null;
   const suggestNum = typeof suggestRaw === 'number' ? suggestRaw : parseFloat(suggestRaw);
   if(isNaN(suggestNum)) return null;
 
   const targetReps = parseTargetReps(ex.reps);
-  let completedSets = 0, totalSets = ex.sets;
-
-  // Find highest weight actually used across all sets
+  let totalSets = ex.sets;
   let maxWeightUsed = 0, anyWeightLogged = false;
-  let partialScore = 0; // sum of (reps done / target) across sets, max 1.0 per set
+  let partialScore = 0;
+
   for(let s=0;s<totalSets;s++){
     const reps = parseInt(setData[`${ex.id}_s${s}_reps`]||'0');
     const wt = parseFloat(setData[`${ex.id}_s${s}_wt`]||'0');
-    if(reps >= targetReps) completedSets++;
+    if(reps >= targetReps) {}
     if(reps > 0) partialScore += Math.min(reps / targetReps, 1.0);
     if(wt > 0){ anyWeightLogged = true; maxWeightUsed = Math.max(maxWeightUsed, wt); }
   }
 
-  // Base next week off actual weight lifted, fall back to suggested
   const baseWeight = anyWeightLogged ? maxWeightUsed : suggestNum;
   const inc = ex.compound ? 5 : 2.5;
-  // Effective completion ratio using partial credit
-  const effectiveRatio = anyWeightLogged || completedSets > 0 ? partialScore / totalSets : 0;
-  let flag, nextWt;
-
-  if(effectiveRatio >= 1.0) {
-    // All sets fully completed
-    nextWt = baseWeight + inc;
-    flag = 'up';
-  } else if(effectiveRatio >= 0.75) {
-    // 75%+ effort (e.g. 3 sets of 10 when target is 12 = 83%)
-    nextWt = baseWeight;
-    flag = 'same';
-  } else {
-    nextWt = Math.max(0, baseWeight - inc);
-    flag = 'down';
+  const effectiveRatio = anyWeightLogged || partialScore > 0 ? partialScore / totalSets : 0;
+  let completedSets = 0;
+  for(let s=0;s<totalSets;s++){
+    const reps = parseInt(setData[`${ex.id}_s${s}_reps`]||'0');
+    if(reps >= targetReps) completedSets++;
   }
+
+  let flag, nextWt;
+  if(effectiveRatio >= 1.0) { nextWt = baseWeight + inc; flag = 'up'; }
+  else if(effectiveRatio >= 0.75) { nextWt = baseWeight; flag = 'same'; }
+  else { nextWt = Math.max(0, baseWeight - inc); flag = 'down'; }
 
   const overrideVal = setData[`${ex.id}_override`];
   return {nextWt, baseWeight, flag, completedSets, totalSets, override: overrideVal||''};
 }
 
-function buildExerciseCard(ex, dayKey, week) {
+function buildExerciseCard(ex, dayKey) {
   const data = appData;
   const card = document.createElement('div');
   card.className = 'ex-card';
   card.id = `card-${ex.id}`;
 
-  // compute status
-  let statusClass = '';
   let hasAnyInput = false;
   let allComplete = true;
   const targetReps = parseTargetReps(ex.reps);
@@ -826,7 +814,7 @@ function buildExerciseCard(ex, dayKey, week) {
     if(wt || reps) hasAnyInput = true;
     if(reps < targetReps) allComplete = false;
   }
-  if(hasAnyInput) statusClass = allComplete ? 'complete' : 'partial';
+  let statusClass = hasAnyInput ? (allComplete ? 'complete' : 'partial') : '';
 
   const suggestDisplay = typeof ex.suggest==='number' ? ex.suggest+' lbs' : ex.suggest;
 
@@ -855,11 +843,11 @@ function buildExerciseCard(ex, dayKey, week) {
       ${Array.from({length:ex.sets},(_,i)=>`
         <div class="set-row" id="setrow-${ex.id}-${i}">
           <div class="set-label">Set ${i+1}</div>
-          <input class="set-input weight-input" type="number" placeholder="${suggestDisplay}" 
+          <input class="set-input weight-input" type="number" placeholder="${suggestDisplay}"
             id="${ex.id}_s${i}_wt" value="${data[`${ex.id}_s${i}_wt`]||''}"
-            onchange="onSetChange('${ex.id}','${dayKey}',${ex.sets})" 
+            onchange="onSetChange('${ex.id}','${dayKey}',${ex.sets})"
             oninput="onSetChange('${ex.id}','${dayKey}',${ex.sets})">
-          <input class="set-input reps-input" type="number" placeholder="${targetReps}" 
+          <input class="set-input reps-input" type="number" placeholder="${targetReps}"
             id="${ex.id}_s${i}_reps" value="${data[`${ex.id}_s${i}_reps`]||''}"
             onchange="onSetChange('${ex.id}','${dayKey}',${ex.sets})"
             oninput="onSetChange('${ex.id}','${dayKey}',${ex.sets})">
@@ -873,7 +861,7 @@ function buildExerciseCard(ex, dayKey, week) {
 }
 
 function renderNextWeekBox(ex, data) {
-  const result = calcNextWeight(ex, data, currentWeek);
+  const result = calcNextWeight(ex, data);
   const box = document.getElementById(`nwb-${ex.id}`);
   if(!box) return;
   if(!result) { box.innerHTML=''; return; }
@@ -892,7 +880,7 @@ function renderNextWeekBox(ex, data) {
       <span class="nwb-flag ${flagClass}">${flagText}</span>
       <div class="nwb-override-wrap">
         <span class="nwb-override-label">Override:</span>
-        <input class="nwb-override" type="number" placeholder="${auto}" 
+        <input class="nwb-override" type="number" placeholder="${auto}"
           id="${ex.id}_override" value="${data[`${ex.id}_override`]||''}"
           onchange="onOverrideChange('${ex.id}')"
           oninput="onOverrideChange('${ex.id}')">
@@ -917,28 +905,21 @@ function renderSetStatuses(ex, data) {
 
 function renderExerciseStatus(ex, data) {
   const target = parseTargetReps(ex.reps);
-  let done=0, hasInput=false;
+  let hasInput=false, partialDone=0;
   for(let s=0;s<ex.sets;s++){
     const r=parseInt(data[`${ex.id}_s${s}_reps`]||'0');
     const w=data[`${ex.id}_s${s}_wt`]||'';
     if(r||w) hasInput=true;
-    if(r>=target) done++;
-  }
-  const el = document.getElementById(`status-${ex.id}`);
-  if(!el) return;
-  // partial credit: count reps/target per set
-  let partialDone = 0;
-  for(let s=0;s<ex.sets;s++){
-    const r=parseInt(data[`${ex.id}_s${s}_reps`]||'0');
     if(r>0) partialDone += Math.min(r/target, 1.0);
   }
   const ratio = partialDone / ex.sets;
+  const el = document.getElementById(`status-${ex.id}`);
+  if(!el) return;
   el.className = 'ex-status' + (!hasInput?'':ratio>=1?' complete':' partial');
 }
 
 function updateDaySummary(dayKey, exercises, data) {
   let completeSets=0, totalSets=0, vol=0;
-  const target_map={};
   exercises.forEach(ex=>{
     const t=parseTargetReps(ex.reps);
     totalSets+=ex.sets;
@@ -946,11 +927,10 @@ function updateDaySummary(dayKey, exercises, data) {
       const r=parseInt(data[`${ex.id}_s${s}_reps`]||'0');
       const w=parseFloat(data[`${ex.id}_s${s}_wt`]||'0');
       if(r>=t) completeSets++;
-      else if(r>0) completeSets += Math.round((r/t)*100)/100; // partial credit
+      else if(r>0) completeSets += Math.round((r/t)*100)/100;
       if(r&&w) vol+=r*w;
     }
   });
-  // IDs are like "p1-d1-complete" so use dayKey directly
   const ce=document.getElementById(`${dayKey}-complete`);
   const te=document.getElementById(`${dayKey}-total`);
   const ve=document.getElementById(`${dayKey}-vol`);
@@ -960,13 +940,12 @@ function updateDaySummary(dayKey, exercises, data) {
 }
 
 function renderAllExercises() {
-  appData = loadData(currentWeek);
   Object.keys(EXERCISES).forEach(dayKey=>{
     const container = document.getElementById(`exercises-${dayKey}`);
     if(!container) return;
     container.innerHTML='';
     EXERCISES[dayKey].forEach(ex=>{
-      const card = buildExerciseCard(ex, dayKey, currentWeek);
+      const card = buildExerciseCard(ex, dayKey);
       container.appendChild(card);
       renderSetStatuses(ex, appData);
       renderNextWeekBox(ex, appData);
@@ -985,16 +964,21 @@ function toggleCard(exId) {
   btn.textContent = expanded ? '−' : '+';
 }
 
+// Debounce saves so we're not hammering Supabase on every keystroke
+let saveDebounceTimer = null;
+function debouncedSave() {
+  clearTimeout(saveDebounceTimer);
+  saveDebounceTimer = setTimeout(() => saveData(currentWeek, appData), 1200);
+}
+
 function onSetChange(exId, dayKey, numSets) {
-  // save
   for(let s=0;s<numSets;s++){
     const wEl=document.getElementById(`${exId}_s${s}_wt`);
     const rEl=document.getElementById(`${exId}_s${s}_reps`);
     if(wEl) appData[`${exId}_s${s}_wt`]=wEl.value;
     if(rEl) appData[`${exId}_s${s}_reps`]=rEl.value;
   }
-  saveData(currentWeek, appData);
-  // find ex
+  debouncedSave();
   const ex = Object.values(EXERCISES).flat().find(e=>e.id===exId);
   if(!ex) return;
   renderSetStatuses(ex, appData);
@@ -1006,7 +990,7 @@ function onSetChange(exId, dayKey, numSets) {
 function onOverrideChange(exId) {
   const el = document.getElementById(`${exId}_override`);
   if(el) appData[`${exId}_override`] = el.value;
-  saveData(currentWeek, appData);
+  debouncedSave();
 }
 
 function showP3Week(wk) {
@@ -1023,19 +1007,22 @@ function showP3Week(wk) {
   document.getElementById('p3-week-desc').textContent = descs[wk]||'';
 }
 
-function changeWeek(delta) {
+async function changeWeek(delta) {
   const next = currentWeek + delta;
   if(next < 1 || next > 10) return;
   currentWeek = next;
   document.getElementById('week-label').textContent = `Week ${currentWeek}`;
+  showSync('loading', '⟳ Loading…');
+  appData = await loadData(currentWeek);
   const phase = getPhaseForWeek(currentWeek);
-  showPhase(phase === 'w7' || phase === 'w8' || phase === 'w9' || phase === 'w10' ? 'p3' : phase);
+  showPhase(['w7','w8','w9','w10'].includes(phase) ? 'p3' : phase);
   if(['w7','w8','w9','w10'].includes(phase)) showP3Week(phase);
   renderAllExercises();
+  showSync('saved', '✓ Loaded');
 }
 
-function saveAll() {
-  saveData(currentWeek, appData);
+async function saveAll() {
+  await saveData(currentWeek, appData);
   const btn = document.querySelector('.btn-green');
   const orig = btn.textContent;
   btn.textContent = '✓ Saved';
@@ -1043,10 +1030,10 @@ function saveAll() {
   setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; }, 1500);
 }
 
-function clearWeek() {
+async function clearWeek() {
   if(!confirm(`Clear all logged data for Week ${currentWeek}?`)) return;
   appData = {};
-  saveData(currentWeek, appData);
+  await saveData(currentWeek, appData);
   renderAllExercises();
 }
 
@@ -1060,7 +1047,6 @@ function showPhase(id) {
 }
 
 function showDay(phase, day) {
-  // find the correct parent container — could be inside a p3week panel
   const dayEl = document.getElementById(`${phase}-${day}`);
   if(!dayEl) return;
   const parent = dayEl.closest('.p3week') || dayEl.closest('.ppanel');
@@ -1071,76 +1057,49 @@ function showDay(phase, day) {
 }
 
 // ─────────────────────────────────────────────
-// EXPORT / IMPORT
+// EXPORT / IMPORT (unchanged — works on appData in memory)
 // ─────────────────────────────────────────────
 function exportData() {
-  const allData = {};
-  for(let w = 1; w <= 10; w++) {
-    const d = loadData(w);
-    if(Object.keys(d).length > 0) allData[`week_${w}`] = d;
-  }
-  if(Object.keys(allData).length === 0) {
-    alert('No data logged yet to export.');
-    return;
-  }
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    program: '10-Week Workout Tracker',
-    data: allData
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `workout-backup-${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  // Visual feedback
-  const btn = [...document.querySelectorAll('.btn-outline')].find(b => b.textContent.includes('Export'));
-  if(btn){ const orig=btn.textContent; btn.textContent='✓ Exported'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)'; setTimeout(()=>{ btn.textContent=orig; btn.style.borderColor=''; btn.style.color=''; }, 2000); }
+  const allDataPromises = [];
+  for(let w=1;w<=10;w++) allDataPromises.push(loadData(w).then(d=>({w,d})));
+  Promise.all(allDataPromises).then(results=>{
+    const allData = {};
+    results.forEach(({w,d})=>{ if(Object.keys(d).length>0) allData[`week_${w}`]=d; });
+    if(Object.keys(allData).length===0){ alert('No data logged yet to export.'); return; }
+    const payload = { exportedAt: new Date().toISOString(), program: '10-Week Workout Tracker', data: allData };
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=`workout-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    const btn=[...document.querySelectorAll('.btn-outline')].find(b=>b.textContent.includes('Export'));
+    if(btn){const orig=btn.textContent;btn.textContent='✓ Exported';btn.style.borderColor='var(--green)';btn.style.color='var(--green)';setTimeout(()=>{btn.textContent=orig;btn.style.borderColor='';btn.style.color='';},2000);}
+  });
 }
 
-function importData(event) {
+async function importData(event) {
   const file = event.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     try {
       const payload = JSON.parse(e.target.result);
       if(!payload.data) throw new Error('Invalid backup file format.');
-
       const weekCount = Object.keys(payload.data).length;
-      if(!confirm(`Import backup from ${payload.exportedAt ? new Date(payload.exportedAt).toLocaleDateString() : 'unknown date'}?
-
-This will restore data for ${weekCount} week(s). Any existing data for those weeks will be overwritten.`)) {
-        event.target.value = '';
-        return;
+      if(!confirm(`Import backup from ${payload.exportedAt?new Date(payload.exportedAt).toLocaleDateString():'unknown date'}?\n\nThis will restore data for ${weekCount} week(s).`)){
+        event.target.value=''; return;
       }
-
-      let imported = 0;
-      for(const [weekKey, weekData] of Object.entries(payload.data)) {
-        const weekNum = parseInt(weekKey.replace('week_', ''));
-        if(weekNum >= 1 && weekNum <= 10) {
-          saveData(weekNum, weekData);
-          imported++;
-        }
+      let imported=0;
+      for(const [weekKey,weekData] of Object.entries(payload.data)){
+        const weekNum=parseInt(weekKey.replace('week_',''));
+        if(weekNum>=1&&weekNum<=10){ await saveData(weekNum,weekData); imported++; }
       }
-
-      // Reload current week display
-      appData = loadData(currentWeek);
+      appData = await loadData(currentWeek);
       renderAllExercises();
-
-      // Visual feedback
-      const btn = [...document.querySelectorAll('.btn-outline')].find(b => b.textContent.includes('Import'));
-      if(btn){ const orig=btn.textContent; btn.textContent=`✓ ${imported} wk(s) restored`; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)'; setTimeout(()=>{ btn.textContent=orig; btn.style.borderColor=''; btn.style.color=''; }, 2500); }
-
-    } catch(err) {
-      alert('Failed to import: ' + err.message + '\nMake sure you are using a valid backup file.');
-    }
-    event.target.value = '';
+      const btn=[...document.querySelectorAll('.btn-outline')].find(b=>b.textContent.includes('Import'));
+      if(btn){const orig=btn.textContent;btn.textContent=`✓ ${imported} wk(s) restored`;btn.style.borderColor='var(--green)';btn.style.color='var(--green)';setTimeout(()=>{btn.textContent=orig;btn.style.borderColor='';btn.style.color='';},2500);}
+    } catch(err){ alert('Failed to import: '+err.message); }
+    event.target.value='';
   };
   reader.readAsText(file);
 }
@@ -1148,7 +1107,15 @@ This will restore data for ${weekCount} week(s). Any existing data for those wee
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
-renderAllExercises();
+async function init() {
+  showSync('loading', '⟳ Connecting…');
+  await initAuth();
+  appData = await loadData(currentWeek);
+  renderAllExercises();
+  showSync('saved', '✓ Ready');
+}
+
+init();
 </script>
 </body>
 </html>
