@@ -1,3 +1,7 @@
+Read 78039 chars
+Applied 26/27 patches
+MISSED:
+  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -418,7 +422,7 @@ input{font-family:'Barlow',sans-serif;}
 
   <!-- Week 8 -->
   <div class="p3week" id="p3panel-w8">
-    <div class="ibox"><div>💡</div><div><strong>Same exercises as Week 7.</strong> Load progressions applied below.<ul class="dlist"><li>Bench 145 → <strong>150 lbs</strong></li><li>Squat 160 → <strong>165 lbs</strong></li><li>Row 110 → <strong>115 lbs</strong></li><li>Deadlift 125 → <strong>130 lbs</strong></li><li>Leg Press: 4 → <strong>5 sets</strong></li><li>Weighted Pull-ups: 4 → <strong>5 sets</strong></li></ul></div></div>
+    <div class="ibox"><div>💡</div><div><strong>Same exercises as Week 7.</strong> Load progressions applied below.<ul class="dlist"><li>Bench 145 → <strong>150 lbs</strong></li><li>Squat 160 → <strong>165 lbs</strong></li><li>Row 110 → <strong>115 lbs</strong></li><li>Deadlift 125 → <strong>130 lbs</strong></li><li>Leg Press: 4 → <strong>5 sets</strong></li><li>Pull-ups: 4 → <strong>5 sets</strong></li></ul></div></div>
     <div class="dtabs">
       <div class="dtab d1 active" onclick="showDay('w8','d1')">Day 1 — Upper A</div>
       <div class="dtab d2" onclick="showDay('w8','d2')">Day 2 — Lower A</div>
@@ -511,13 +515,13 @@ const EXERCISES = {
     {id:'p1d2_squat', name:'Barbell Back Squat', note:'Primary strength lift', sets:4, reps:'4–6', rest:'2–3 min', suggest:150, compound:true},
     {id:'p1d2_rdl',   name:'Romanian Deadlift', sets:3, reps:'8–10', rest:'2 min', suggest:100, compound:true},
     {id:'p1d2_lp',    name:'Leg Press', sets:3, reps:'10–12', rest:'90 sec', suggest:185, compound:false},
-    {id:'p1d2_lunge', name:'Walking Lunges', sets:3, reps:'10 ea.', rest:'90 sec', suggest:'20 ea.', compound:false},
+    {id:'p1d2_lunge', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
     {id:'p1d2_ext',   name:'Leg Extension', sets:3, reps:'12–15', rest:'60 sec', suggest:50, compound:false},
-    {id:'p1d2_calf',  name:'Standing Calf Raise', sets:4, reps:'12–15', rest:'60 sec', suggest:45, compound:false},
+    {id:'p1d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
   'p1-d3': [
     {id:'p1d3_row',   name:'Barbell Row', note:'Primary strength lift', sets:4, reps:'4–6', rest:'2–3 min', suggest:100, compound:true},
-    {id:'p1d3_pu',    name:'Pull-ups / Weighted Pull-ups', sets:3, reps:'6–10', rest:'2 min', suggest:'BW', compound:false},
+    {id:'p1d3_pu',    name:'Pull-ups', sets:3, reps:'6–10', rest:'2 min', suggest:'BW', compound:false},
     {id:'p1d3_lpd',   name:'Lat Pulldown (Wide Grip)', sets:3, reps:'10–12', rest:'90 sec', suggest:80, compound:false},
     {id:'p1d3_crow',  name:'Seated Cable Row', sets:3, reps:'10–12', rest:'90 sec', suggest:70, compound:false},
     {id:'p1d3_fp',    name:'Face Pulls', sets:3, reps:'15', rest:'60 sec', suggest:30, compound:false},
@@ -544,15 +548,15 @@ const EXERCISES = {
     {id:'p2d2_squat', name:'Barbell Back Squat', sets:4, reps:'4–6', rest:'2–3 min', suggest:155, compound:true},
     {id:'p2d2_hack',  name:'Hack Squat', note:'Replaces Leg Press', sets:3, reps:'10–12', rest:'90 sec', suggest:100, compound:false},
     {id:'p2d2_rdl',   name:'Romanian Deadlift', sets:3, reps:'8–10', rest:'2 min', suggest:100, compound:true},
-    {id:'p2d2_rlunge',name:'Reverse Lunges', note:'Replaces Walking Lunges', sets:3, reps:'10 ea.', rest:'90 sec', suggest:'20 ea.', compound:false},
+    {id:'p2d2_abduct', name:'Hip Abductor Machine', note:'Replaces lunges', sets:3, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
     {id:'p2d2_ext',   name:'Leg Extension', sets:3, reps:'12–15', rest:'60 sec', suggest:55, compound:false},
-    {id:'p2d2_calf',  name:'Standing Calf Raise', sets:4, reps:'12–15', rest:'60 sec', suggest:45, compound:false},
+    {id:'p2d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
   'p2-d3': [
     {id:'p2d3_row',   name:'Barbell Row', sets:4, reps:'4–6', rest:'2–3 min', suggest:105, compound:true},
-    {id:'p2d3_csrow', name:'Chest-Supported DB Row', note:'Isolates back', sets:3, reps:'10–12', rest:'90 sec', suggest:'35 ea.', compound:false},
-    {id:'p2d3_pu',    name:'Pull-ups / Weighted Pull-ups', sets:3, reps:'6–10', rest:'2 min', suggest:'BW', compound:false},
-    {id:'p2d3_sarow', name:'Single-Arm Cable Row', note:'Unilateral', sets:3, reps:'10–12 ea.', rest:'90 sec', suggest:'40 ea.', compound:false},
+    {id:'p2d3_dbrow', name:'Dumbbell Row', note:'Unilateral', sets:3, reps:'10–12', rest:'90 sec', suggest:'35 ea.', compound:false},
+    {id:'p2d3_pu',    name:'Pull-ups', sets:3, reps:'6–10', rest:'2 min', suggest:'BW', compound:false},
+    {id:'p2d3_lmrow', name:'Landmine Row', note:'Unilateral', sets:3, reps:'8–10 ea.', rest:'90 sec', suggest:'plate select', compound:false},
     {id:'p2d3_fp',    name:'Face Pulls', sets:3, reps:'15', rest:'60 sec', suggest:32, compound:false},
     {id:'p2d3_ez',    name:'EZ Bar Curl', sets:3, reps:'10–12', rest:'60 sec', suggest:55, compound:false},
     {id:'p2d3_ham',   name:'Hammer Curl', sets:2, reps:'12', rest:'60 sec', suggest:'20 ea.', compound:false},
@@ -576,13 +580,13 @@ const EXERCISES = {
   'w7-d2': [
     {id:'w7d2_squat', name:'Barbell Back Squat', sets:4, reps:'3–5', rest:'3 min', suggest:160, compound:true},
     {id:'w7d2_lp',    name:'Leg Press', sets:4, reps:'10–12', rest:'90 sec', suggest:190, compound:false},
-    {id:'w7d2_lunge', name:'Walking Lunges', sets:3, reps:'12 ea.', rest:'90 sec', suggest:'20 ea.', compound:false},
+    {id:'w7d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
     {id:'w7d2_ext',   name:'Leg Extension', sets:3, reps:'15', rest:'60 sec', suggest:55, compound:false},
-    {id:'w7d2_calf',  name:'Standing Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:50, compound:false},
+    {id:'w7d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
   'w7-d3': [
     {id:'w7d3_row',   name:'Barbell Row', sets:4, reps:'3–5', rest:'3 min', suggest:110, compound:true},
-    {id:'w7d3_wpu',   name:'Weighted Pull-ups', sets:4, reps:'6–8', rest:'2 min', suggest:'+10 lbs', compound:false},
+    {id:'w7d3_pu',    name:'Pull-ups', sets:4, reps:'6–8', rest:'2 min', suggest:'BW', compound:false},
     {id:'w7d3_lpdn',  name:'Lat Pulldown (Neutral Grip)', sets:3, reps:'10–12', rest:'90 sec', suggest:85, compound:false},
     {id:'w7d3_crow',  name:'Seated Cable Row', sets:3, reps:'10–12', rest:'90 sec', suggest:75, compound:false},
     {id:'w7d3_fp',    name:'Face Pulls', sets:3, reps:'15', rest:'60 sec', suggest:35, compound:false},
@@ -601,9 +605,8 @@ const EXERCISES = {
     {id:'w7d5_idc',   name:'Incline DB Curl', sets:3, reps:'12', rest:'60 sec', suggest:'15 ea.', compound:false},
     {id:'w7d5_skull', name:'Skull Crushers', sets:3, reps:'10–12', rest:'60 sec', suggest:55, compound:false},
     {id:'w7d5_cpd',   name:'Cable Tricep Pushdown', sets:3, reps:'12–15', rest:'60 sec', suggest:45, compound:false},
-    {id:'w7d5_cc',    name:'Cable Crunch', sets:3, reps:'15', rest:'60 sec', suggest:50, compound:false},
+    {id:'w7d5_acm',   name:'Ab Crunch Machine', sets:3, reps:'15', rest:'60 sec', suggest:50, compound:false},
     {id:'w7d5_hlr',   name:'Hanging Leg Raise', sets:3, reps:'12–15', rest:'60 sec', suggest:'BW', compound:false},
-    {id:'w7d5_plank', name:'Plank', sets:3, reps:'45 sec', rest:'60 sec', suggest:'BW', compound:false},
   ],
   'w8-d1': [
     {id:'w8d1_bench', name:'Barbell Bench Press', sets:4, reps:'3–5', rest:'3 min', suggest:150, compound:true},
@@ -616,15 +619,15 @@ const EXERCISES = {
   'w8-d2': [
     {id:'w8d2_squat', name:'Barbell Back Squat', sets:4, reps:'3–5', rest:'3 min', suggest:165, compound:true},
     {id:'w8d2_lp',    name:'Leg Press', sets:5, reps:'10–12', rest:'90 sec', suggest:190, compound:false},
-    {id:'w8d2_lunge', name:'Walking Lunges', sets:3, reps:'12 ea.', rest:'90 sec', suggest:'20 ea.', compound:false},
+    {id:'w8d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
     {id:'w8d2_ext',   name:'Leg Extension', sets:3, reps:'15', rest:'60 sec', suggest:55, compound:false},
-    {id:'w8d2_calf',  name:'Standing Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:50, compound:false},
+    {id:'w8d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
   'w8-d3': [
     {id:'w8d3_row',   name:'Barbell Row', sets:4, reps:'3–5', rest:'3 min', suggest:115, compound:true},
-    {id:'w8d3_wpu',   name:'Weighted Pull-ups', sets:5, reps:'6–8', rest:'2 min', suggest:'+10 lbs', compound:false},
+    {id:'w8d3_pu',    name:'Pull-ups', sets:5, reps:'6–8', rest:'2 min', suggest:'BW', compound:false},
     {id:'w8d3_lpdn',  name:'Lat Pulldown (Neutral Grip)', sets:3, reps:'10–12', rest:'90 sec', suggest:85, compound:false},
-    {id:'w8d3_crow',  name:'Seated Cable Row', sets:3, reps:'10–12', rest:'90 sec', suggest:75, compound:false},
+    {id:'w8d3_lmrow', name:'Landmine Row', note:'Unilateral', sets:3, reps:'8–10 ea.', rest:'90 sec', suggest:'plate select', compound:false},
     {id:'w8d3_fp',    name:'Face Pulls', sets:3, reps:'15', rest:'60 sec', suggest:35, compound:false},
     {id:'w8d3_idc',   name:'Incline DB Curl', sets:3, reps:'12', rest:'60 sec', suggest:'15 ea.', compound:false},
   ],
@@ -641,9 +644,8 @@ const EXERCISES = {
     {id:'w8d5_idc',   name:'Incline DB Curl', sets:3, reps:'12', rest:'60 sec', suggest:'15 ea.', compound:false},
     {id:'w8d5_skull', name:'Skull Crushers', sets:3, reps:'10–12', rest:'60 sec', suggest:55, compound:false},
     {id:'w8d5_cpd',   name:'Cable Tricep Pushdown', sets:3, reps:'12–15', rest:'60 sec', suggest:45, compound:false},
-    {id:'w8d5_cc',    name:'Cable Crunch', sets:3, reps:'15', rest:'60 sec', suggest:50, compound:false},
+    {id:'w8d5_acm',   name:'Ab Crunch Machine', sets:3, reps:'15', rest:'60 sec', suggest:50, compound:false},
     {id:'w8d5_hlr',   name:'Hanging Leg Raise', sets:3, reps:'12–15', rest:'60 sec', suggest:'BW', compound:false},
-    {id:'w8d5_plank', name:'Plank', sets:3, reps:'45 sec', rest:'60 sec', suggest:'BW', compound:false},
   ],
   'w9-d1': [
     {id:'w9d1_bench', name:'Barbell Bench Press', sets:5, reps:'3–5', rest:'3 min', suggest:155, compound:true},
@@ -651,19 +653,19 @@ const EXERCISES = {
     {id:'w9d1_pec',   name:'Pec Deck / Machine Fly', sets:3, reps:'12–15', rest:'60 sec', suggest:50, compound:false},
     {id:'w9d1_bbohp', name:'Seated Barbell OHP', sets:3, reps:'6–8', rest:'2 min', suggest:90, compound:true},
     {id:'w9d1_clat',  name:'Cable Lateral Raise', sets:4, reps:'15', rest:'60 sec', suggest:'12 ea.', compound:false},
-    {id:'w9d1_dip',   name:'Weighted Dip', sets:3, reps:'8–10', rest:'90 sec', suggest:'+15 lbs', compound:false},
+    {id:'w9d1_dip',   name:'Bodyweight Dip', sets:3, reps:'8–10', rest:'90 sec', suggest:'BW', compound:false},
   ],
   'w9-d2': [
     {id:'w9d2_squat', name:'Barbell Back Squat', sets:5, reps:'3–5', rest:'3 min', suggest:170, compound:true},
     {id:'w9d2_hack',  name:'Hack Squat', sets:4, reps:'10–12', rest:'90 sec', suggest:105, compound:false},
-    {id:'w9d2_rlunge',name:'Reverse Lunge', sets:3, reps:'10 ea.', rest:'90 sec', suggest:'22 ea.', compound:false},
+    {id:'w9d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
     {id:'w9d2_ext',   name:'Leg Extension', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
-    {id:'w9d2_calf',  name:'Standing Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:50, compound:false},
+    {id:'w9d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
   'w9-d3': [
     {id:'w9d3_row',   name:'Barbell Row', sets:5, reps:'3–5', rest:'3 min', suggest:120, compound:true},
-    {id:'w9d3_wpu',   name:'Weighted Pull-ups', sets:4, reps:'6–8', rest:'2 min', suggest:'+15 lbs', compound:false},
-    {id:'w9d3_csrow', name:'Chest-Supported DB Row', sets:3, reps:'10–12', rest:'90 sec', suggest:'37 ea.', compound:false},
+    {id:'w9d3_pu',    name:'Pull-ups', sets:4, reps:'6–8', rest:'2 min', suggest:'BW', compound:false},
+    {id:'w9d3_dbrow', name:'Dumbbell Row', sets:3, reps:'10–12', rest:'90 sec', suggest:'37 ea.', compound:false},
     {id:'w9d3_lpd',   name:'Lat Pulldown (Wide Grip)', sets:3, reps:'10–12', rest:'90 sec', suggest:87, compound:false},
     {id:'w9d3_fp',    name:'Face Pulls', sets:3, reps:'15', rest:'60 sec', suggest:35, compound:false},
     {id:'w9d3_ez',    name:'EZ Bar Curl', sets:3, reps:'10–12', rest:'60 sec', suggest:60, compound:false},
@@ -682,9 +684,8 @@ const EXERCISES = {
     {id:'w9d5_cc2',   name:'Cable Curl', sets:3, reps:'12–15', rest:'60 sec', suggest:30, compound:false},
     {id:'w9d5_skull', name:'Skull Crushers', sets:4, reps:'10–12', rest:'60 sec', suggest:55, compound:false},
     {id:'w9d5_ohe',   name:'Overhead Tricep Extension', sets:3, reps:'12', rest:'60 sec', suggest:35, compound:false},
-    {id:'w9d5_crunch',name:'Cable Crunch', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
+    {id:'w9d5_acm',   name:'Ab Crunch Machine', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
     {id:'w9d5_hlr',   name:'Hanging Leg Raise', sets:3, reps:'15', rest:'60 sec', suggest:'BW', compound:false},
-    {id:'w9d5_abw',   name:'Ab Wheel Rollout', sets:3, reps:'10–12', rest:'60 sec', suggest:'BW', compound:false},
   ],
   'w10-d1': [
     {id:'w10d1_bench',name:'Barbell Bench Press', sets:5, reps:'3–5', rest:'3 min', suggest:160, compound:true},
@@ -692,19 +693,19 @@ const EXERCISES = {
     {id:'w10d1_pec',  name:'Pec Deck / Machine Fly', sets:3, reps:'12–15', rest:'60 sec', suggest:50, compound:false},
     {id:'w10d1_bbohp',name:'Seated Barbell OHP', sets:3, reps:'6–8', rest:'2 min', suggest:90, compound:true},
     {id:'w10d1_clat', name:'Cable Lateral Raise', sets:4, reps:'15', rest:'60 sec', suggest:'12 ea.', compound:false},
-    {id:'w10d1_dip',  name:'Weighted Dip', sets:3, reps:'8–10', rest:'90 sec', suggest:'+15 lbs', compound:false},
+    {id:'w10d1_dip',  name:'Bodyweight Dip', sets:3, reps:'8–10', rest:'90 sec', suggest:'BW', compound:false},
   ],
   'w10-d2': [
     {id:'w10d2_squat',name:'Barbell Back Squat', sets:5, reps:'3–5', rest:'3 min', suggest:175, compound:true},
     {id:'w10d2_hack', name:'Hack Squat', sets:4, reps:'10–12', rest:'90 sec', suggest:105, compound:false},
-    {id:'w10d2_rl',   name:'Reverse Lunge', sets:3, reps:'10 ea.', rest:'90 sec', suggest:'22 ea.', compound:false},
+    {id:'w10d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
     {id:'w10d2_ext',  name:'Leg Extension', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
-    {id:'w10d2_calf', name:'Standing Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:50, compound:false},
+    {id:'w10d2_calf', name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
   'w10-d3': [
     {id:'w10d3_row',  name:'Barbell Row', sets:5, reps:'3–5', rest:'3 min', suggest:125, compound:true},
-    {id:'w10d3_wpu',  name:'Weighted Pull-ups', sets:4, reps:'6–8', rest:'2 min', suggest:'+15 lbs', compound:false},
-    {id:'w10d3_csrow',name:'Chest-Supported DB Row', sets:3, reps:'10–12', rest:'90 sec', suggest:'37 ea.', compound:false},
+    {id:'w10d3_pu',   name:'Pull-ups', sets:4, reps:'6–8', rest:'2 min', suggest:'BW', compound:false},
+    {id:'w10d3_dbrow', name:'Dumbbell Row', sets:3, reps:'10–12', rest:'90 sec', suggest:'37 ea.', compound:false},
     {id:'w10d3_lpd',  name:'Lat Pulldown (Wide Grip)', sets:3, reps:'10–12', rest:'90 sec', suggest:87, compound:false},
     {id:'w10d3_fp',   name:'Face Pulls', sets:3, reps:'15', rest:'60 sec', suggest:35, compound:false},
     {id:'w10d3_ez',   name:'EZ Bar Curl', sets:3, reps:'10–12', rest:'60 sec', suggest:60, compound:false},
@@ -723,9 +724,8 @@ const EXERCISES = {
     {id:'w10d5_cc',   name:'Cable Curl', sets:3, reps:'12–15', rest:'60 sec', suggest:30, compound:false},
     {id:'w10d5_skull',name:'Skull Crushers', sets:4, reps:'10–12', rest:'60 sec', suggest:55, compound:false},
     {id:'w10d5_ohe',  name:'Overhead Tricep Extension', sets:3, reps:'12', rest:'60 sec', suggest:35, compound:false},
-    {id:'w10d5_crunch',name:'Cable Crunch', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
+    {id:'w10d5_acm',  name:'Ab Crunch Machine', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
     {id:'w10d5_hlr',  name:'Hanging Leg Raise', sets:3, reps:'15', rest:'60 sec', suggest:'BW', compound:false},
-    {id:'w10d5_abw',  name:'Ab Wheel Rollout', sets:3, reps:'10–12', rest:'60 sec', suggest:'BW', compound:false},
   ],
 };
 
