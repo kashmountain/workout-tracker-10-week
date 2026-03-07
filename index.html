@@ -567,6 +567,7 @@ async function setNewPassword() {
   else {
     msg.className='login-msg ok'; msg.textContent='✓ Password updated! Signing you in…';
     setTimeout(async () => {
+      inPasswordRecovery = false;
       document.getElementById('reset-form').style.display='none';
       document.getElementById('login-form').style.display='block';
       const { data: { session } } = await db.auth.getSession();
@@ -1270,9 +1271,10 @@ async function init() {
   }
 
   // Listen for future auth changes (sign in / sign out)
+  let inPasswordRecovery = false;
   db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
-      // Show reset password form instead of loading the app
+      inPasswordRecovery = true;
       document.getElementById('login-overlay').classList.remove('hidden');
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('reset-form').style.display = 'block';
@@ -1280,7 +1282,7 @@ async function init() {
       document.getElementById('login-msg').textContent = '';
       return;
     }
-    if (event === 'SIGNED_IN' && session && session.user) {
+    if (event === 'SIGNED_IN' && session && session.user && !inPasswordRecovery) {
       showApp(session.user);
       showSync('loading', '⟳ Loading…');
       appData = await loadData(currentWeek);
@@ -1288,6 +1290,7 @@ async function init() {
       showSync('saved', '✓ Ready');
     }
     if (event === 'SIGNED_OUT') {
+      inPasswordRecovery = false;
       currentUserId = null;
       appData = {};
       document.getElementById('login-overlay').classList.remove('hidden');
