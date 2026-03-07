@@ -579,6 +579,8 @@ async function setNewPassword() {
     }, 1500);
   }
 }
+
+async function forgotPassword() {
   const email = document.getElementById('login-email').value.trim();
   const msg = document.getElementById('login-msg');
   if (!email) { msg.className='login-msg err'; msg.textContent='Enter your email above first.'; return; }
