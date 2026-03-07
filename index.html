@@ -30,6 +30,25 @@ input{font-family:'Barlow',sans-serif;}
 #sync-status.error{background:#fde8e8;color:var(--red);border:1px solid var(--red);}
 #sync-status.loading{background:var(--blue-d);color:var(--blue);border:1px solid var(--blue);}
 
+/* ── LOGIN OVERLAY ── */
+#login-overlay{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;}
+#login-overlay.hidden{display:none;}
+.login-box{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:32px 28px;width:100%;max-width:360px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.login-box h2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.login-box h2 span{color:var(--green);}
+.login-box p{font-size:12px;color:var(--dim);margin-bottom:20px;}
+.login-input{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:5px;font-size:13px;font-family:'Barlow',sans-serif;color:var(--text);background:var(--s2);margin-bottom:10px;}
+.login-input:focus{outline:none;border-color:var(--green);background:var(--s3);}
+.login-btn{width:100%;padding:9px;background:var(--green);color:#000;border:none;border-radius:5px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow',sans-serif;}
+.login-btn:hover{filter:brightness(1.1);}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;}
+.login-msg{font-size:11px;margin-top:10px;text-align:center;min-height:16px;}
+.login-msg.ok{color:var(--green);}
+.login-msg.err{color:var(--red);}
+.login-user{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.logout-btn{font-size:11px;color:var(--dim);background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:'Barlow',sans-serif;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+
 /* ── HEADER ── */
 .hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;}
 .hdr-left h1{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:.5px;color:var(--text);}
@@ -223,6 +242,17 @@ input{font-family:'Barlow',sans-serif;}
 
 <div id="sync-status">Saving…</div>
 
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div class="login-box">
+    <h2>WORKOUT <span>TRACKER</span></h2>
+    <p>Enter your email to get a magic link — no password needed. Works across all your devices.</p>
+    <input class="login-input" type="email" id="login-email" placeholder="your@email.com" />
+    <button class="login-btn" id="login-btn" onclick="sendMagicLink()">Send Magic Link</button>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-left">
@@ -240,6 +270,7 @@ input{font-family:'Barlow',sans-serif;}
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
     <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">⬆ Import</button>
     <button class="btn btn-green" onclick="saveAll()">Save Progress</button>
+    <div class="login-user"><span id="user-email-display"></span><button class="logout-btn" id="logout-btn" onclick="logOut()" style="display:none">Sign out</button></div>
   </div>
 </div>
 
@@ -445,22 +476,50 @@ input{font-family:'Barlow',sans-serif;}
 // ─────────────────────────────────────────────
 const SUPABASE_URL = 'https://qzmbbcpjkmzacxbptiny.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable__lWRDOMyS33kGebhdTvHkw_xkowYyPG';
+const SITE_URL = 'https://kashmountain.github.io/workout-tracker-10-week/';
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, storage: window.localStorage }
+});
 
 let currentUserId = null;
 
-async function initAuth() {
-  // Try to restore existing session
-  const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    currentUserId = session.user.id;
-  } else {
-    // Sign in anonymously — creates a persistent identity for this device
-    const { data, error } = await db.auth.signInAnonymously();
-    if (error) { console.error('Auth error:', error); return; }
-    currentUserId = data.user.id;
-  }
+// ─────────────────────────────────────────────
+// AUTH — MAGIC LINK
+// ─────────────────────────────────────────────
+async function sendMagicLink() {
+  const email = document.getElementById('login-email').value.trim();
+  const btn = document.getElementById('login-btn');
+  const msg = document.getElementById('login-msg');
+  if (!email || !email.includes('@')) { msg.className='login-msg err'; msg.textContent='Please enter a valid email.'; return; }
+  btn.disabled = true;
+  msg.className='login-msg'; msg.textContent='Sending…';
+  const { error } = await db.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: SITE_URL }
+  });
+  if (error) { msg.className='login-msg err'; msg.textContent='Error: '+error.message; btn.disabled=false; }
+  else { msg.className='login-msg ok'; msg.textContent='✓ Check your email and click the link to sign in!'; }
+}
+
+function showApp(user) {
+  currentUserId = user.id;
+  document.getElementById('login-overlay').classList.add('hidden');
+  const emailDisplay = document.getElementById('user-email-display');
+  const logoutBtn = document.getElementById('logout-btn');
+  if (user.email) { emailDisplay.textContent = user.email; logoutBtn.style.display='inline-block'; }
+}
+
+async function logOut() {
+  await db.auth.signOut();
+  currentUserId = null;
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('user-email-display').textContent='';
+  document.getElementById('logout-btn').style.display='none';
+  document.getElementById('login-msg').textContent='';
+  document.getElementById('login-btn').disabled=false;
+  appData={};
+  renderAllExercises();
 }
 
 // ─────────────────────────────────────────────
@@ -1109,10 +1168,29 @@ async function importData(event) {
 // ─────────────────────────────────────────────
 async function init() {
   showSync('loading', '⟳ Connecting…');
-  await initAuth();
-  appData = await loadData(currentWeek);
-  renderAllExercises();
-  showSync('saved', '✓ Ready');
+
+  // Listen for auth state changes (handles magic link redirect)
+  db.auth.onAuthStateChange(async (event, session) => {
+    if (session && session.user) {
+      showApp(session.user);
+      appData = await loadData(currentWeek);
+      renderAllExercises();
+      showSync('saved', '✓ Ready');
+    }
+  });
+
+  // Check for existing session on load
+  const { data: { session } } = await db.auth.getSession();
+  if (session && session.user) {
+    showApp(session.user);
+    appData = await loadData(currentWeek);
+    renderAllExercises();
+    showSync('saved', '✓ Ready');
+  } else {
+    // No session — show login screen
+    document.getElementById('login-overlay').classList.remove('hidden');
+    showSync('saved', '');
+  }
 }
 
 init();
