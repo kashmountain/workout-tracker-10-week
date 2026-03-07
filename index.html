@@ -595,10 +595,10 @@ async function loadData(week) {
       .select('data')
       .eq('user_id', currentUserId)
       .eq('week', week)
-      .single();
-    if (error || !data) return {};
-    return data.data || {};
-  } catch(e) { return {}; }
+      .maybeSingle();
+    if (error) { console.error('Load error:', error); return {}; }
+    return (data && data.data) ? data.data : {};
+  } catch(e) { console.error('Load exception:', e); return {}; }
 }
 
 async function saveData(week, data) {
@@ -611,9 +611,9 @@ async function saveData(week, data) {
         { user_id: currentUserId, week, data, updated_at: new Date().toISOString() },
         { onConflict: 'user_id,week' }
       );
-    if (error) { showSync('error', '✗ Save failed'); console.error(error); }
+    if (error) { showSync('error', '✗ Save failed — ' + error.message); console.error('Save error:', error); }
     else { showSync('saved', '✓ Saved'); }
-  } catch(e) { showSync('error', '✗ Save failed'); }
+  } catch(e) { showSync('error', '✗ Save failed'); console.error('Save exception:', e); }
 }
 
 // ─────────────────────────────────────────────
@@ -1217,11 +1217,28 @@ async function importData(event) {
 async function init() {
   showSync('loading', '⟳ Connecting…');
 
-  // Block rendering until auth is resolved
-  let authResolved = false;
+  // Check for existing session immediately on load
+  const { data: { session } } = await db.auth.getSession();
+  if (session && session.user) {
+    showApp(session.user);
+    showSync('loading', '⟳ Loading…');
+    appData = await loadData(currentWeek);
+    renderAllExercises();
+    showSync('saved', '✓ Ready');
+  } else {
+    document.getElementById('login-overlay').classList.remove('hidden');
+    showSync('saved', '');
+  }
 
-  // onAuthStateChange fires on every load — use it as the single source of truth
+  // Listen for future auth changes (sign in / sign out)
   db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session && session.user) {
+      showApp(session.user);
+      showSync('loading', '⟳ Loading…');
+      appData = await loadData(currentWeek);
+      renderAllExercises();
+      showSync('saved', '✓ Ready');
+    }
     if (event === 'SIGNED_OUT') {
       currentUserId = null;
       appData = {};
@@ -1229,35 +1246,8 @@ async function init() {
       document.getElementById('user-email-display').textContent = '';
       document.getElementById('logout-btn').style.display = 'none';
       renderAllExercises();
-      return;
-    }
-
-    if (session && session.user && !authResolved) {
-      authResolved = true;
-      showApp(session.user);
-      showSync('loading', '⟳ Loading…');
-      appData = await loadData(currentWeek);
-      renderAllExercises();
-      showSync('saved', '✓ Ready');
     }
   });
-
-  // Fallback: if onAuthStateChange doesn't fire within 3s, check session manually
-  setTimeout(async () => {
-    if (authResolved) return;
-    const { data: { session } } = await db.auth.getSession();
-    if (session && session.user) {
-      authResolved = true;
-      showApp(session.user);
-      showSync('loading', '⟳ Loading…');
-      appData = await loadData(currentWeek);
-      renderAllExercises();
-      showSync('saved', '✓ Ready');
-    } else {
-      document.getElementById('login-overlay').classList.remove('hidden');
-      showSync('saved', '');
-    }
-  }, 3000);
 }
 
 init();
