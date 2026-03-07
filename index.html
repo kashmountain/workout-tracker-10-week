@@ -561,24 +561,10 @@ async function setNewPassword() {
   if (p1.length < 6) { msg.className='login-msg err'; msg.textContent='Password must be at least 6 characters.'; return; }
   if (p1 !== p2) { msg.className='login-msg err'; msg.textContent='Passwords do not match.'; return; }
   btn.disabled = true;
-  msg.className='login-msg'; msg.textContent='Updating…';
+  msg.className='login-msg'; msg.textContent='Updating password…';
   const { error } = await db.auth.updateUser({ password: p1 });
   if (error) { msg.className='login-msg err'; msg.textContent=error.message; btn.disabled=false; }
-  else {
-    msg.className='login-msg ok'; msg.textContent='✓ Password updated! Signing you in…';
-    setTimeout(async () => {
-      inPasswordRecovery = false;
-      document.getElementById('reset-form').style.display='none';
-      document.getElementById('login-form').style.display='block';
-      const { data: { session } } = await db.auth.getSession();
-      if (session && session.user) {
-        showApp(session.user);
-        appData = await loadData(currentWeek);
-        renderAllExercises();
-        showSync('saved', '✓ Ready');
-      }
-    }, 1500);
-  }
+  else { msg.className='login-msg ok'; msg.textContent='✓ Password updated! Loading your tracker…'; }
 }
 
 async function forgotPassword() {
@@ -1254,10 +1240,50 @@ async function importData(event) {
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
 async function init() {
   showSync('loading', '⟳ Connecting…');
 
-  // Check for existing session immediately on load
+  // Check URL hash for recovery token BEFORE doing anything else
+  const hash = window.location.hash;
+  const isRecovery = hash.includes('type=recovery');
+
+  if (isRecovery) {
+    // Clear the hash from the URL so it doesn't re-trigger on refresh
+    history.replaceState(null, '', window.location.pathname);
+    // Show reset form immediately
+    document.getElementById('login-overlay').classList.remove('hidden');
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('reset-form').style.display = 'block';
+    document.getElementById('login-subtitle').textContent = 'Set a new password for your account.';
+    showSync('saved', '');
+
+    // Still need to establish the session from the token so updateUser works
+    db.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        currentUserId = null;
+        appData = {};
+        document.getElementById('login-overlay').classList.remove('hidden');
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('reset-form').style.display = 'none';
+        document.getElementById('user-email-display').textContent = '';
+        document.getElementById('logout-btn').style.display = 'none';
+        renderAllExercises();
+      }
+      // After password update, USER_UPDATED fires — load the app
+      if (event === 'USER_UPDATED' && session && session.user) {
+        showApp(session.user);
+        appData = await loadData(currentWeek);
+        renderAllExercises();
+        showSync('saved', '✓ Ready');
+      }
+    });
+    return;
+  }
+
+  // Normal flow — check for existing session
   const { data: { session } } = await db.auth.getSession();
   if (session && session.user) {
     showApp(session.user);
@@ -1271,18 +1297,8 @@ async function init() {
   }
 
   // Listen for future auth changes (sign in / sign out)
-  let inPasswordRecovery = false;
   db.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'PASSWORD_RECOVERY') {
-      inPasswordRecovery = true;
-      document.getElementById('login-overlay').classList.remove('hidden');
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('reset-form').style.display = 'block';
-      document.getElementById('login-subtitle').textContent = 'Set a new password for your account.';
-      document.getElementById('login-msg').textContent = '';
-      return;
-    }
-    if (event === 'SIGNED_IN' && session && session.user && !inPasswordRecovery) {
+    if (event === 'SIGNED_IN' && session && session.user) {
       showApp(session.user);
       showSync('loading', '⟳ Loading…');
       appData = await loadData(currentWeek);
@@ -1290,7 +1306,6 @@ async function init() {
       showSync('saved', '✓ Ready');
     }
     if (event === 'SIGNED_OUT') {
-      inPasswordRecovery = false;
       currentUserId = null;
       appData = {};
       document.getElementById('login-overlay').classList.remove('hidden');
