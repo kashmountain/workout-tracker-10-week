@@ -246,9 +246,16 @@ input{font-family:'Barlow',sans-serif;}
 <div id="login-overlay">
   <div class="login-box">
     <h2>WORKOUT <span>TRACKER</span></h2>
-    <p>Enter your email to get a magic link — no password needed. Works across all your devices.</p>
+    <p id="login-subtitle">Sign in to sync your data across all devices.</p>
     <input class="login-input" type="email" id="login-email" placeholder="your@email.com" />
-    <button class="login-btn" id="login-btn" onclick="sendMagicLink()">Send Magic Link</button>
+    <input class="login-input" type="password" id="login-password" placeholder="Password" />
+    <button class="login-btn" id="login-btn" onclick="signIn()">Sign In</button>
+    <div style="text-align:center;margin-top:10px;">
+      <span style="font-size:11px;color:var(--muted)">No account? </span>
+      <span style="font-size:11px;color:var(--green);cursor:pointer;font-weight:600;" onclick="toggleMode()">Create one</span>
+      &nbsp;·&nbsp;
+      <span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="forgotPassword()">Forgot password?</span>
+    </div>
     <div class="login-msg" id="login-msg"></div>
   </div>
 </div>
@@ -485,21 +492,62 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 let currentUserId = null;
 
 // ─────────────────────────────────────────────
-// AUTH — MAGIC LINK
+// AUTH — EMAIL + PASSWORD
 // ─────────────────────────────────────────────
-async function sendMagicLink() {
+let authMode = 'signin'; // 'signin' or 'signup'
+
+function toggleMode() {
+  authMode = authMode === 'signin' ? 'signup' : 'signin';
+  const btn = document.getElementById('login-btn');
+  const subtitle = document.getElementById('login-subtitle');
+  const toggle = document.querySelector('[onclick="toggleMode()"]');
+  if (authMode === 'signup') {
+    btn.textContent = 'Create Account';
+    btn.onclick = signUp;
+    subtitle.textContent = 'Create an account to sync your data across all devices.';
+    toggle.textContent = 'Sign in instead';
+  } else {
+    btn.textContent = 'Sign In';
+    btn.onclick = signIn;
+    subtitle.textContent = 'Sign in to sync your data across all devices.';
+    toggle.textContent = 'Create one';
+  }
+  document.getElementById('login-msg').textContent = '';
+}
+
+async function signIn() {
   const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
   const btn = document.getElementById('login-btn');
   const msg = document.getElementById('login-msg');
-  if (!email || !email.includes('@')) { msg.className='login-msg err'; msg.textContent='Please enter a valid email.'; return; }
+  if (!email || !password) { msg.className='login-msg err'; msg.textContent='Please enter email and password.'; return; }
   btn.disabled = true;
-  msg.className='login-msg'; msg.textContent='Sending…';
-  const { error } = await db.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: SITE_URL }
-  });
-  if (error) { msg.className='login-msg err'; msg.textContent='Error: '+error.message; btn.disabled=false; }
-  else { msg.className='login-msg ok'; msg.textContent='✓ Check your email and click the link to sign in!'; }
+  msg.className='login-msg'; msg.textContent='Signing in…';
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  if (error) { msg.className='login-msg err'; msg.textContent=error.message; btn.disabled=false; }
+}
+
+async function signUp() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const msg = document.getElementById('login-msg');
+  if (!email || !password) { msg.className='login-msg err'; msg.textContent='Please enter email and password.'; return; }
+  if (password.length < 6) { msg.className='login-msg err'; msg.textContent='Password must be at least 6 characters.'; return; }
+  btn.disabled = true;
+  msg.className='login-msg'; msg.textContent='Creating account…';
+  const { error } = await db.auth.signUp({ email, password });
+  if (error) { msg.className='login-msg err'; msg.textContent=error.message; btn.disabled=false; }
+  else { msg.className='login-msg ok'; msg.textContent='✓ Account created! Check your email to confirm, then sign in.'; btn.disabled=false; }
+}
+
+async function forgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  const msg = document.getElementById('login-msg');
+  if (!email) { msg.className='login-msg err'; msg.textContent='Enter your email above first.'; return; }
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: SITE_URL });
+  if (error) { msg.className='login-msg err'; msg.textContent=error.message; }
+  else { msg.className='login-msg ok'; msg.textContent='✓ Password reset email sent!'; }
 }
 
 function showApp(user) {
@@ -1169,28 +1217,47 @@ async function importData(event) {
 async function init() {
   showSync('loading', '⟳ Connecting…');
 
-  // Listen for auth state changes (handles magic link redirect)
+  // Block rendering until auth is resolved
+  let authResolved = false;
+
+  // onAuthStateChange fires on every load — use it as the single source of truth
   db.auth.onAuthStateChange(async (event, session) => {
-    if (session && session.user) {
+    if (event === 'SIGNED_OUT') {
+      currentUserId = null;
+      appData = {};
+      document.getElementById('login-overlay').classList.remove('hidden');
+      document.getElementById('user-email-display').textContent = '';
+      document.getElementById('logout-btn').style.display = 'none';
+      renderAllExercises();
+      return;
+    }
+
+    if (session && session.user && !authResolved) {
+      authResolved = true;
       showApp(session.user);
+      showSync('loading', '⟳ Loading…');
       appData = await loadData(currentWeek);
       renderAllExercises();
       showSync('saved', '✓ Ready');
     }
   });
 
-  // Check for existing session on load
-  const { data: { session } } = await db.auth.getSession();
-  if (session && session.user) {
-    showApp(session.user);
-    appData = await loadData(currentWeek);
-    renderAllExercises();
-    showSync('saved', '✓ Ready');
-  } else {
-    // No session — show login screen
-    document.getElementById('login-overlay').classList.remove('hidden');
-    showSync('saved', '');
-  }
+  // Fallback: if onAuthStateChange doesn't fire within 3s, check session manually
+  setTimeout(async () => {
+    if (authResolved) return;
+    const { data: { session } } = await db.auth.getSession();
+    if (session && session.user) {
+      authResolved = true;
+      showApp(session.user);
+      showSync('loading', '⟳ Loading…');
+      appData = await loadData(currentWeek);
+      renderAllExercises();
+      showSync('saved', '✓ Ready');
+    } else {
+      document.getElementById('login-overlay').classList.remove('hidden');
+      showSync('saved', '');
+    }
+  }, 3000);
 }
 
 init();
