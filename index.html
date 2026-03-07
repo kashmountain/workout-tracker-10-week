@@ -106,6 +106,7 @@ input{font-family:'Barlow',sans-serif;}
 .ex-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:border-color .15s;}
 .ex-card:hover{border-color:var(--border2);}
 .ex-card.expanded{border-color:var(--border2);}
+.ex-card.custom-ex{border-left:3px solid var(--amber);}
 .ex-header{padding:10px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
 .ex-expand-btn{width:22px;height:22px;border-radius:4px;border:1px solid var(--border2);background:var(--s2);color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .15s;}
 .ex-card.expanded .ex-expand-btn{background:var(--s3);border-color:var(--green);color:var(--green);}
@@ -153,6 +154,35 @@ input{font-family:'Barlow',sans-serif;}
 .flag-up{background:var(--green-m);color:var(--green);}
 .flag-same{background:var(--s3);color:var(--dim);}
 .flag-down{background:var(--red-m);color:var(--red);}
+
+/* ── EDIT MODE ── */
+.edit-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--border);background:#fffdf8;}
+.edit-btn{font-size:10px;font-weight:700;padding:4px 10px;border-radius:4px;cursor:pointer;border:none;font-family:'Barlow',sans-serif;transition:all .15s;}
+.edit-btn-pencil{background:var(--amber-d);color:var(--amber);border:1px solid rgba(196,120,0,.3);}
+.edit-btn-pencil:hover{background:var(--amber);color:#fff;}
+.edit-btn-remove{background:var(--red-m);color:var(--red);border:1px solid rgba(192,56,56,.2);}
+.edit-btn-remove:hover{background:var(--red);color:#fff;}
+.edit-btn-reset{background:var(--s2);color:var(--dim);border:1px solid var(--border2);}
+.edit-btn-reset:hover{background:var(--s3);color:var(--text);}
+.edit-form{border-top:1px solid var(--border);padding:12px 14px;background:#fffdf8;display:none;}
+.ex-card.editing .edit-form{display:block;}
+.edit-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.edit-field{display:flex;flex-direction:column;gap:3px;}
+.edit-field.full{grid-column:1/-1;}
+.edit-label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.edit-input{background:var(--s2);border:1px solid var(--border2);border-radius:4px;padding:6px 9px;font-size:12px;color:var(--text);width:100%;font-family:'Barlow',sans-serif;}
+.edit-input:focus{outline:none;border-color:var(--amber);background:#fffaf2;}
+.edit-actions{display:flex;gap:6px;align-items:center;}
+.edit-save-btn{background:var(--green);color:#000;border:none;border-radius:4px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow',sans-serif;}
+.edit-save-btn:hover{filter:brightness(1.1);}
+.edit-cancel-btn{background:var(--s2);color:var(--dim);border:1px solid var(--border2);border-radius:4px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Barlow',sans-serif;}
+.edit-cancel-btn:hover{background:var(--s3);}
+.edit-hint{font-size:10px;color:var(--muted);margin-left:auto;}
+
+/* ── ADD EXERCISE BUTTON ── */
+.add-ex-wrap{margin-top:4px;margin-bottom:12px;}
+.add-ex-btn{width:100%;padding:9px;border:2px dashed var(--border2);border-radius:7px;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Barlow',sans-serif;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.add-ex-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-m);}
 
 /* ── IDENTICAL WEEK BOX ── */
 .ibox{background:#f5f8ff;border:1px solid var(--border2);border-radius:6px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--dim);display:flex;gap:9px;}
@@ -235,6 +265,7 @@ input{font-family:'Barlow',sans-serif;}
   .mgrid{grid-template-columns:repeat(2,1fr);}
   .sets-grid-header,.set-row{grid-template-columns:50px 1fr 1fr 70px;}
   .ex-meta{display:none;}
+  .edit-form-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -247,8 +278,6 @@ input{font-family:'Barlow',sans-serif;}
   <div class="login-box">
     <h2>WORKOUT <span>TRACKER</span></h2>
     <p id="login-subtitle">Sign in to sync your data across all devices.</p>
-
-    <!-- Normal login/signup form -->
     <div id="login-form">
       <input class="login-input" type="email" id="login-email" placeholder="your@email.com" />
       <input class="login-input" type="password" id="login-password" placeholder="Password" />
@@ -260,14 +289,11 @@ input{font-family:'Barlow',sans-serif;}
         <span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="forgotPassword()">Forgot password?</span>
       </div>
     </div>
-
-    <!-- Reset password form (shown after clicking reset link in email) -->
     <div id="reset-form" style="display:none">
       <input class="login-input" type="password" id="reset-password" placeholder="New password (6+ characters)" />
       <input class="login-input" type="password" id="reset-password2" placeholder="Confirm new password" />
       <button class="login-btn" id="reset-btn" onclick="setNewPassword()">Set New Password</button>
     </div>
-
     <div class="login-msg" id="login-msg"></div>
   </div>
 </div>
@@ -504,9 +530,9 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 let currentUserId = null;
 
 // ─────────────────────────────────────────────
-// AUTH — EMAIL + PASSWORD
+// AUTH
 // ─────────────────────────────────────────────
-let authMode = 'signin'; // 'signin' or 'signup'
+let authMode = 'signin';
 
 function toggleMode() {
   authMode = authMode === 'signin' ? 'signup' : 'signin';
@@ -514,13 +540,11 @@ function toggleMode() {
   const subtitle = document.getElementById('login-subtitle');
   const toggle = document.querySelector('[onclick="toggleMode()"]');
   if (authMode === 'signup') {
-    btn.textContent = 'Create Account';
-    btn.onclick = signUp;
+    btn.textContent = 'Create Account'; btn.onclick = signUp;
     subtitle.textContent = 'Create an account to sync your data across all devices.';
     toggle.textContent = 'Sign in instead';
   } else {
-    btn.textContent = 'Sign In';
-    btn.onclick = signIn;
+    btn.textContent = 'Sign In'; btn.onclick = signIn;
     subtitle.textContent = 'Sign in to sync your data across all devices.';
     toggle.textContent = 'Create one';
   }
@@ -533,8 +557,7 @@ async function signIn() {
   const btn = document.getElementById('login-btn');
   const msg = document.getElementById('login-msg');
   if (!email || !password) { msg.className='login-msg err'; msg.textContent='Please enter email and password.'; return; }
-  btn.disabled = true;
-  msg.className='login-msg'; msg.textContent='Signing in…';
+  btn.disabled = true; msg.className='login-msg'; msg.textContent='Signing in…';
   const { error } = await db.auth.signInWithPassword({ email, password });
   if (error) { msg.className='login-msg err'; msg.textContent=error.message; btn.disabled=false; }
 }
@@ -546,8 +569,7 @@ async function signUp() {
   const msg = document.getElementById('login-msg');
   if (!email || !password) { msg.className='login-msg err'; msg.textContent='Please enter email and password.'; return; }
   if (password.length < 6) { msg.className='login-msg err'; msg.textContent='Password must be at least 6 characters.'; return; }
-  btn.disabled = true;
-  msg.className='login-msg'; msg.textContent='Creating account…';
+  btn.disabled = true; msg.className='login-msg'; msg.textContent='Creating account…';
   const { error } = await db.auth.signUp({ email, password });
   if (error) { msg.className='login-msg err'; msg.textContent=error.message; btn.disabled=false; }
   else { msg.className='login-msg ok'; msg.textContent='✓ Account created! Check your email to confirm, then sign in.'; btn.disabled=false; }
@@ -560,8 +582,7 @@ async function setNewPassword() {
   const btn = document.getElementById('reset-btn');
   if (p1.length < 6) { msg.className='login-msg err'; msg.textContent='Password must be at least 6 characters.'; return; }
   if (p1 !== p2) { msg.className='login-msg err'; msg.textContent='Passwords do not match.'; return; }
-  btn.disabled = true;
-  msg.className='login-msg'; msg.textContent='Updating password…';
+  btn.disabled = true; msg.className='login-msg'; msg.textContent='Updating password…';
   const { error } = await db.auth.updateUser({ password: p1 });
   if (error) { msg.className='login-msg err'; msg.textContent=error.message; btn.disabled=false; }
   else { msg.className='login-msg ok'; msg.textContent='✓ Password updated! Loading your tracker…'; }
@@ -592,36 +613,29 @@ async function logOut() {
   document.getElementById('logout-btn').style.display='none';
   document.getElementById('login-msg').textContent='';
   document.getElementById('login-btn').disabled=false;
-  appData={};
+  appData={}; customExercises={};
   renderAllExercises();
 }
 
 // ─────────────────────────────────────────────
-// SYNC STATUS UI
+// SYNC STATUS
 // ─────────────────────────────────────────────
 let syncTimer = null;
 function showSync(type, text) {
   const el = document.getElementById('sync-status');
-  el.className = `show ${type}`;
-  el.textContent = text;
+  el.className = `show ${type}`; el.textContent = text;
   clearTimeout(syncTimer);
-  if (type === 'saved') {
-    syncTimer = setTimeout(() => { el.className = ''; }, 2000);
-  }
+  if (type === 'saved') syncTimer = setTimeout(() => { el.className = ''; }, 2000);
 }
 
 // ─────────────────────────────────────────────
-// DATA — SUPABASE READS / WRITES
+// DATA — SUPABASE
 // ─────────────────────────────────────────────
 async function loadData(week) {
   if (!currentUserId) return {};
   try {
-    const { data, error } = await db
-      .from('workout_data')
-      .select('data')
-      .eq('user_id', currentUserId)
-      .eq('week', week)
-      .maybeSingle();
+    const { data, error } = await db.from('workout_data').select('data')
+      .eq('user_id', currentUserId).eq('week', week).maybeSingle();
     if (error) { console.error('Load error:', error); return {}; }
     return (data && data.data) ? data.data : {};
   } catch(e) { console.error('Load exception:', e); return {}; }
@@ -631,21 +645,43 @@ async function saveData(week, data) {
   if (!currentUserId) return;
   showSync('saving', '⟳ Saving…');
   try {
-    const { error } = await db
-      .from('workout_data')
-      .upsert(
-        { user_id: currentUserId, week, data, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id,week' }
-      );
+    const { error } = await db.from('workout_data').upsert(
+      { user_id: currentUserId, week, data, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,week' }
+    );
     if (error) { showSync('error', '✗ Save failed — ' + error.message); console.error('Save error:', error); }
     else { showSync('saved', '✓ Saved'); }
   } catch(e) { showSync('error', '✗ Save failed'); console.error('Save exception:', e); }
 }
 
+// Customizations stored in week=0 slot
+async function loadCustomizations() {
+  if (!currentUserId) return {};
+  try {
+    const { data, error } = await db.from('workout_data').select('data')
+      .eq('user_id', currentUserId).eq('week', 0).maybeSingle();
+    if (error) { console.error('Load customizations error:', error); return {}; }
+    return (data && data.data) ? data.data : {};
+  } catch(e) { console.error('Load customizations exception:', e); return {}; }
+}
+
+async function saveCustomizations() {
+  if (!currentUserId) return;
+  showSync('saving', '⟳ Saving…');
+  try {
+    const { error } = await db.from('workout_data').upsert(
+      { user_id: currentUserId, week: 0, data: customExercises, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,week' }
+    );
+    if (error) { showSync('error', '✗ Save failed — ' + error.message); }
+    else { showSync('saved', '✓ Saved'); }
+  } catch(e) { showSync('error', '✗ Save failed'); }
+}
+
 // ─────────────────────────────────────────────
-// DATA
+// DEFAULT EXERCISES DATA
 // ─────────────────────────────────────────────
-const EXERCISES = {
+const DEFAULT_EXERCISES = {
   'p1-d1': [
     {id:'p1d1_bench', name:'Barbell Bench Press', note:'Primary strength lift', sets:4, reps:'4–6', rest:'2–3 min', suggest:135, compound:true},
     {id:'p1d1_inc',   name:'Incline Dumbbell Press', sets:3, reps:'8–12', rest:'90 sec', suggest:'30 ea.', compound:false},
@@ -873,6 +909,17 @@ const EXERCISES = {
 };
 
 // ─────────────────────────────────────────────
+// EXERCISES = merged view (defaults + customizations)
+// ─────────────────────────────────────────────
+// customExercises stores per-dayKey arrays that fully replace the default
+// Shape: { 'p1-d1': [ {id, name, sets, reps, suggest, compound, note?}, ... ], ... }
+let customExercises = {};
+
+function getExercisesForDay(dayKey) {
+  return customExercises[dayKey] || DEFAULT_EXERCISES[dayKey] || [];
+}
+
+// ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
 let currentWeek = 1;
@@ -891,7 +938,7 @@ function getPhaseForWeek(w) {
 // RENDER
 // ─────────────────────────────────────────────
 function parseTargetReps(repsStr) {
-  const m = repsStr.match(/(\d+)/);
+  const m = String(repsStr).match(/(\d+)/);
   return m ? parseInt(m[1]) : 5;
 }
 
@@ -900,20 +947,14 @@ function calcNextWeight(ex, setData) {
   if(typeof suggestRaw === 'string' && (suggestRaw==='BW' || suggestRaw.startsWith('+'))) return null;
   const suggestNum = typeof suggestRaw === 'number' ? suggestRaw : parseFloat(suggestRaw);
   if(isNaN(suggestNum)) return null;
-
   const targetReps = parseTargetReps(ex.reps);
-  let totalSets = ex.sets;
-  let maxWeightUsed = 0, anyWeightLogged = false;
-  let partialScore = 0;
-
+  let totalSets = ex.sets, maxWeightUsed = 0, anyWeightLogged = false, partialScore = 0;
   for(let s=0;s<totalSets;s++){
     const reps = parseInt(setData[`${ex.id}_s${s}_reps`]||'0');
     const wt = parseFloat(setData[`${ex.id}_s${s}_wt`]||'0');
-    if(reps >= targetReps) {}
     if(reps > 0) partialScore += Math.min(reps / targetReps, 1.0);
     if(wt > 0){ anyWeightLogged = true; maxWeightUsed = Math.max(maxWeightUsed, wt); }
   }
-
   const baseWeight = anyWeightLogged ? maxWeightUsed : suggestNum;
   const inc = ex.compound ? 5 : 2.5;
   const effectiveRatio = anyWeightLogged || partialScore > 0 ? partialScore / totalSets : 0;
@@ -922,12 +963,10 @@ function calcNextWeight(ex, setData) {
     const reps = parseInt(setData[`${ex.id}_s${s}_reps`]||'0');
     if(reps >= targetReps) completedSets++;
   }
-
   let flag, nextWt;
   if(effectiveRatio >= 1.0) { nextWt = baseWeight + inc; flag = 'up'; }
   else if(effectiveRatio >= 0.75) { nextWt = baseWeight; flag = 'same'; }
   else { nextWt = Math.max(0, baseWeight - inc); flag = 'down'; }
-
   const overrideVal = setData[`${ex.id}_override`];
   return {nextWt, baseWeight, flag, completedSets, totalSets, override: overrideVal||''};
 }
@@ -935,11 +974,11 @@ function calcNextWeight(ex, setData) {
 function buildExerciseCard(ex, dayKey) {
   const data = appData;
   const card = document.createElement('div');
-  card.className = 'ex-card';
+  const isCustom = !!(customExercises[dayKey]);
+  card.className = 'ex-card' + (isCustom ? ' custom-ex' : '');
   card.id = `card-${ex.id}`;
 
-  let hasAnyInput = false;
-  let allComplete = true;
+  let hasAnyInput = false, allComplete = true;
   const targetReps = parseTargetReps(ex.reps);
   for(let s=0;s<ex.sets;s++){
     const reps = parseInt(data[`${ex.id}_s${s}_reps`]||'0');
@@ -948,22 +987,26 @@ function buildExerciseCard(ex, dayKey) {
     if(reps < targetReps) allComplete = false;
   }
   let statusClass = hasAnyInput ? (allComplete ? 'complete' : 'partial') : '';
-
   const suggestDisplay = typeof ex.suggest==='number' ? ex.suggest+' lbs' : ex.suggest;
+
+  // Check if this dayKey has been customized to show reset option
+  const dayIsCustomized = !!(customExercises[dayKey]);
+  const defaultDay = DEFAULT_EXERCISES[dayKey] || [];
+  const isThisExDefault = defaultDay.some(d => d.id === ex.id);
 
   card.innerHTML = `
     <div class="ex-header" onclick="toggleCard('${ex.id}')">
       <div class="ex-expand-btn" id="btn-${ex.id}">+</div>
       <div class="ex-status ${statusClass}" id="status-${ex.id}"></div>
       <div class="ex-name-wrap">
-        <div class="ex-name">${ex.name}</div>
-        ${ex.note ? `<div class="ex-sub">${ex.note}</div>` : ''}
+        <div class="ex-name" id="exname-${ex.id}">${ex.name}</div>
+        ${ex.note ? `<div class="ex-sub" id="exnote-${ex.id}">${ex.note}</div>` : `<div class="ex-sub" id="exnote-${ex.id}" style="display:none"></div>`}
       </div>
       <div class="ex-meta">
-        <span class="meta-pill sets">${ex.sets} sets</span>
-        <span class="meta-pill reps">${ex.reps}</span>
+        <span class="meta-pill sets" id="expill-sets-${ex.id}">${ex.sets} sets</span>
+        <span class="meta-pill reps" id="expill-reps-${ex.id}">${ex.reps}</span>
         <span class="meta-pill rest">${ex.rest}</span>
-        <span class="meta-pill suggest">${suggestDisplay}</span>
+        <span class="meta-pill suggest" id="expill-suggest-${ex.id}">${suggestDisplay}</span>
       </div>
     </div>
     <div class="ex-sets" id="sets-${ex.id}">
@@ -988,9 +1031,185 @@ function buildExerciseCard(ex, dayKey) {
         </div>
       `).join('')}
       <div class="next-week-box" id="nwb-${ex.id}"></div>
+      <!-- EDIT BAR -->
+      <div class="edit-bar">
+        <button class="edit-btn edit-btn-pencil" onclick="toggleEditForm('${ex.id}','${dayKey}'); event.stopPropagation();">✏️ Edit</button>
+        <button class="edit-btn edit-btn-remove" onclick="removeExercise('${ex.id}','${dayKey}'); event.stopPropagation();">✕ Remove</button>
+        ${dayIsCustomized && isThisExDefault ? '' : ''}
+      </div>
+      <!-- EDIT FORM -->
+      <div class="edit-form" id="editform-${ex.id}">
+        <div class="edit-form-grid">
+          <div class="edit-field full">
+            <div class="edit-label">Exercise Name</div>
+            <input class="edit-input" id="ef-name-${ex.id}" type="text" value="${ex.name}" placeholder="Exercise name" />
+          </div>
+          <div class="edit-field">
+            <div class="edit-label">Sets</div>
+            <input class="edit-input" id="ef-sets-${ex.id}" type="number" min="1" max="10" value="${ex.sets}" placeholder="4" />
+          </div>
+          <div class="edit-field">
+            <div class="edit-label">Reps / Target</div>
+            <input class="edit-input" id="ef-reps-${ex.id}" type="text" value="${ex.reps}" placeholder="e.g. 4–6 or 10" />
+          </div>
+          <div class="edit-field">
+            <div class="edit-label">Suggested Weight</div>
+            <input class="edit-input" id="ef-suggest-${ex.id}" type="text" value="${ex.suggest}" placeholder="e.g. 135 or BW" />
+          </div>
+          <div class="edit-field">
+            <div class="edit-label">Note (optional)</div>
+            <input class="edit-input" id="ef-note-${ex.id}" type="text" value="${ex.note||''}" placeholder="e.g. Primary lift" />
+          </div>
+        </div>
+        <div class="edit-actions">
+          <button class="edit-save-btn" onclick="saveExerciseEdit('${ex.id}','${dayKey}'); event.stopPropagation();">Save Changes</button>
+          <button class="edit-cancel-btn" onclick="toggleEditForm('${ex.id}','${dayKey}'); event.stopPropagation();">Cancel</button>
+          <span class="edit-hint">Changes apply to this day across all weeks in this phase</span>
+        </div>
+      </div>
     </div>
   `;
   return card;
+}
+
+function toggleEditForm(exId, dayKey) {
+  const card = document.getElementById(`card-${exId}`);
+  const isEditing = card.classList.toggle('editing');
+  // Ensure card is expanded when editing
+  if(isEditing && !card.classList.contains('expanded')) {
+    card.classList.add('expanded');
+    const btn = document.getElementById(`btn-${exId}`);
+    if(btn) btn.textContent = '−';
+  }
+}
+
+function saveExerciseEdit(exId, dayKey) {
+  const nameEl = document.getElementById(`ef-name-${exId}`);
+  const setsEl = document.getElementById(`ef-sets-${exId}`);
+  const repsEl = document.getElementById(`ef-reps-${exId}`);
+  const suggestEl = document.getElementById(`ef-suggest-${exId}`);
+  const noteEl = document.getElementById(`ef-note-${exId}`);
+  if(!nameEl) return;
+
+  const newName = nameEl.value.trim() || 'Exercise';
+  const newSets = Math.max(1, Math.min(10, parseInt(setsEl.value)||3));
+  const newReps = repsEl.value.trim() || '8–12';
+  const newSuggestRaw = suggestEl.value.trim();
+  const newSuggest = isNaN(parseFloat(newSuggestRaw)) ? newSuggestRaw : parseFloat(newSuggestRaw);
+  const newNote = noteEl.value.trim();
+
+  // Get current exercises for this day, fall back to defaults
+  const currentList = customExercises[dayKey]
+    ? [...customExercises[dayKey]]
+    : [...(DEFAULT_EXERCISES[dayKey] || [])].map(e => ({...e}));
+
+  const idx = currentList.findIndex(e => e.id === exId);
+  if(idx === -1) return;
+
+  const oldSets = currentList[idx].sets;
+  currentList[idx] = {
+    ...currentList[idx],
+    name: newName,
+    sets: newSets,
+    reps: newReps,
+    suggest: newSuggest,
+    note: newNote || undefined,
+  };
+
+  // If sets changed, clean up any extra set data from appData
+  if(newSets < oldSets) {
+    for(let s = newSets; s < oldSets; s++) {
+      delete appData[`${exId}_s${s}_wt`];
+      delete appData[`${exId}_s${s}_reps`];
+    }
+  }
+
+  customExercises[dayKey] = currentList;
+  saveCustomizations();
+
+  // Re-render just this day
+  rerenderDay(dayKey);
+  // Re-save workout data (in case set data was trimmed)
+  debouncedSave();
+}
+
+function removeExercise(exId, dayKey) {
+  if(!confirm('Remove this exercise from the day?')) return;
+
+  const currentList = customExercises[dayKey]
+    ? [...customExercises[dayKey]]
+    : [...(DEFAULT_EXERCISES[dayKey] || [])].map(e => ({...e}));
+
+  const newList = currentList.filter(e => e.id !== exId);
+  customExercises[dayKey] = newList;
+
+  // Clean up appData for removed exercise
+  Object.keys(appData).forEach(k => {
+    if(k.startsWith(exId + '_')) delete appData[k];
+  });
+
+  saveCustomizations();
+  debouncedSave();
+  rerenderDay(dayKey);
+}
+
+function addExercise(dayKey) {
+  const currentList = customExercises[dayKey]
+    ? [...customExercises[dayKey]]
+    : [...(DEFAULT_EXERCISES[dayKey] || [])].map(e => ({...e}));
+
+  // Generate unique id
+  const newId = `custom_${dayKey.replace(/[-]/g,'')}_${Date.now()}`;
+  const newEx = {
+    id: newId,
+    name: 'New Exercise',
+    sets: 3,
+    reps: '8–12',
+    rest: '90 sec',
+    suggest: '',
+    compound: false,
+    note: '',
+    isNew: true,
+  };
+
+  currentList.push(newEx);
+  customExercises[dayKey] = currentList;
+  saveCustomizations();
+  rerenderDay(dayKey);
+
+  // Auto-expand the new card and open its edit form
+  setTimeout(() => {
+    const card = document.getElementById(`card-${newId}`);
+    if(card) {
+      card.classList.add('expanded', 'editing');
+      const btn = document.getElementById(`btn-${newId}`);
+      if(btn) btn.textContent = '−';
+      const nameInput = document.getElementById(`ef-name-${newId}`);
+      if(nameInput) { nameInput.focus(); nameInput.select(); }
+    }
+  }, 50);
+}
+
+function rerenderDay(dayKey) {
+  const container = document.getElementById(`exercises-${dayKey}`);
+  if(!container) return;
+  container.innerHTML = '';
+  const exercises = getExercisesForDay(dayKey);
+  exercises.forEach(ex => {
+    const card = buildExerciseCard(ex, dayKey);
+    container.appendChild(card);
+    renderSetStatuses(ex, appData);
+    renderNextWeekBox(ex, appData);
+  });
+  // Re-add the add button
+  const addWrap = document.getElementById(`addex-${dayKey}`);
+  if(addWrap) addWrap.remove(); // remove old one
+  const addDiv = document.createElement('div');
+  addDiv.className = 'add-ex-wrap';
+  addDiv.id = `addex-${dayKey}`;
+  addDiv.innerHTML = `<button class="add-ex-btn" onclick="addExercise('${dayKey}')">＋ Add Exercise</button>`;
+  container.after(addDiv);
+  updateDaySummary(dayKey, exercises, appData);
 }
 
 function renderNextWeekBox(ex, data) {
@@ -998,13 +1217,11 @@ function renderNextWeekBox(ex, data) {
   const box = document.getElementById(`nwb-${ex.id}`);
   if(!box) return;
   if(!result) { box.innerHTML=''; return; }
-
   const flagClass = result.flag==='up'?'flag-up':result.flag==='down'?'flag-down':'flag-same';
   const flagText = result.flag==='up'?'↑ Increase':result.flag==='down'?'↓ Drop weight':'→ Hold weight';
   const auto = result.nextWt;
   const baseLabel = result.baseWeight !== (typeof ex.suggest==='number'?ex.suggest:parseFloat(ex.suggest)||0)
     ? ` (from ${result.baseWeight} lbs lifted)` : '';
-
   box.innerHTML = `
     <div class="nwb-title">Next Week Suggestion</div>
     <div class="nwb-row">
@@ -1073,17 +1290,26 @@ function updateDaySummary(dayKey, exercises, data) {
 }
 
 function renderAllExercises() {
-  Object.keys(EXERCISES).forEach(dayKey=>{
+  Object.keys(DEFAULT_EXERCISES).forEach(dayKey => {
     const container = document.getElementById(`exercises-${dayKey}`);
     if(!container) return;
     container.innerHTML='';
-    EXERCISES[dayKey].forEach(ex=>{
+    const exercises = getExercisesForDay(dayKey);
+    exercises.forEach(ex => {
       const card = buildExerciseCard(ex, dayKey);
       container.appendChild(card);
       renderSetStatuses(ex, appData);
       renderNextWeekBox(ex, appData);
     });
-    updateDaySummary(dayKey, EXERCISES[dayKey], appData);
+    // Add "Add Exercise" button after container
+    let addWrap = document.getElementById(`addex-${dayKey}`);
+    if(addWrap) addWrap.remove();
+    addWrap = document.createElement('div');
+    addWrap.className = 'add-ex-wrap';
+    addWrap.id = `addex-${dayKey}`;
+    addWrap.innerHTML = `<button class="add-ex-btn" onclick="addExercise('${dayKey}')">＋ Add Exercise</button>`;
+    container.after(addWrap);
+    updateDaySummary(dayKey, exercises, appData);
   });
 }
 
@@ -1095,9 +1321,10 @@ function toggleCard(exId) {
   const btn = document.getElementById(`btn-${exId}`);
   const expanded = card.classList.toggle('expanded');
   btn.textContent = expanded ? '−' : '+';
+  // Close edit form if collapsing
+  if(!expanded) card.classList.remove('editing');
 }
 
-// Debounce saves so we're not hammering Supabase on every keystroke
 let saveDebounceTimer = null;
 function debouncedSave() {
   clearTimeout(saveDebounceTimer);
@@ -1112,12 +1339,13 @@ function onSetChange(exId, dayKey, numSets) {
     if(rEl) appData[`${exId}_s${s}_reps`]=rEl.value;
   }
   debouncedSave();
-  const ex = Object.values(EXERCISES).flat().find(e=>e.id===exId);
+  const exercises = getExercisesForDay(dayKey);
+  const ex = exercises.find(e=>e.id===exId);
   if(!ex) return;
   renderSetStatuses(ex, appData);
   renderExerciseStatus(ex, appData);
   renderNextWeekBox(ex, appData);
-  updateDaySummary(dayKey, EXERCISES[dayKey], appData);
+  updateDaySummary(dayKey, exercises, appData);
 }
 
 function onOverrideChange(exId) {
@@ -1158,8 +1386,7 @@ async function saveAll() {
   await saveData(currentWeek, appData);
   const btn = document.querySelector('.btn-green');
   const orig = btn.textContent;
-  btn.textContent = '✓ Saved';
-  btn.style.background = '#2a9d5c';
+  btn.textContent = '✓ Saved'; btn.style.background = '#2a9d5c';
   setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; }, 1500);
 }
 
@@ -1190,7 +1417,7 @@ function showDay(phase, day) {
 }
 
 // ─────────────────────────────────────────────
-// EXPORT / IMPORT (unchanged — works on appData in memory)
+// EXPORT / IMPORT
 // ─────────────────────────────────────────────
 function exportData() {
   const allDataPromises = [];
@@ -1198,8 +1425,12 @@ function exportData() {
   Promise.all(allDataPromises).then(results=>{
     const allData = {};
     results.forEach(({w,d})=>{ if(Object.keys(d).length>0) allData[`week_${w}`]=d; });
-    if(Object.keys(allData).length===0){ alert('No data logged yet to export.'); return; }
-    const payload = { exportedAt: new Date().toISOString(), program: '10-Week Workout Tracker', data: allData };
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      program: '10-Week Workout Tracker',
+      data: allData,
+      customizations: customExercises
+    };
     const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1227,6 +1458,11 @@ async function importData(event) {
         const weekNum=parseInt(weekKey.replace('week_',''));
         if(weekNum>=1&&weekNum<=10){ await saveData(weekNum,weekData); imported++; }
       }
+      // Restore customizations if present
+      if(payload.customizations) {
+        customExercises = payload.customizations;
+        await saveCustomizations();
+      }
       appData = await loadData(currentWeek);
       renderAllExercises();
       const btn=[...document.querySelectorAll('.btn-outline')].find(b=>b.textContent.includes('Import'));
@@ -1240,9 +1476,6 @@ async function importData(event) {
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
 async function init() {
   showSync('loading', '⟳ Connecting…');
 
@@ -1250,7 +1483,6 @@ async function init() {
   const isRecovery = hash.includes('type=recovery');
 
   if (isRecovery) {
-    // Handle password recovery
     db.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         history.replaceState(null, '', window.location.pathname);
@@ -1267,6 +1499,7 @@ async function init() {
         currentUserId = session.user.id;
         showApp(session.user);
         showSync('loading', '⟳ Loading…');
+        customExercises = await loadCustomizations();
         appData = await loadData(currentWeek);
         renderAllExercises();
         showSync('saved', '✓ Ready');
@@ -1275,18 +1508,17 @@ async function init() {
     return;
   }
 
-  // Normal flow
   const { data: { session } } = await db.auth.getSession();
 
   if (session && session.user) {
     currentUserId = session.user.id;
     showApp(session.user);
     showSync('loading', '⟳ Loading…');
+    customExercises = await loadCustomizations();
     appData = await loadData(currentWeek);
     renderAllExercises();
     showSync('saved', '✓ Ready');
   } else {
-    // No session — listen for sign in
     document.getElementById('login-overlay').classList.remove('hidden');
     showSync('saved', '');
 
@@ -1295,6 +1527,7 @@ async function init() {
         currentUserId = session.user.id;
         showApp(session.user);
         showSync('loading', '⟳ Loading…');
+        customExercises = await loadCustomizations();
         appData = await loadData(currentWeek);
         renderAllExercises();
         showSync('saved', '✓ Ready');
@@ -1302,6 +1535,7 @@ async function init() {
       if (event === 'SIGNED_OUT') {
         currentUserId = null;
         appData = {};
+        customExercises = {};
         document.getElementById('login-overlay').classList.remove('hidden');
         document.getElementById('login-form').style.display = 'block';
         document.getElementById('reset-form').style.display = 'none';
