@@ -247,15 +247,27 @@ input{font-family:'Barlow',sans-serif;}
   <div class="login-box">
     <h2>WORKOUT <span>TRACKER</span></h2>
     <p id="login-subtitle">Sign in to sync your data across all devices.</p>
-    <input class="login-input" type="email" id="login-email" placeholder="your@email.com" />
-    <input class="login-input" type="password" id="login-password" placeholder="Password" />
-    <button class="login-btn" id="login-btn" onclick="signIn()">Sign In</button>
-    <div style="text-align:center;margin-top:10px;">
-      <span style="font-size:11px;color:var(--muted)">No account? </span>
-      <span style="font-size:11px;color:var(--green);cursor:pointer;font-weight:600;" onclick="toggleMode()">Create one</span>
-      &nbsp;·&nbsp;
-      <span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="forgotPassword()">Forgot password?</span>
+
+    <!-- Normal login/signup form -->
+    <div id="login-form">
+      <input class="login-input" type="email" id="login-email" placeholder="your@email.com" />
+      <input class="login-input" type="password" id="login-password" placeholder="Password" />
+      <button class="login-btn" id="login-btn" onclick="signIn()">Sign In</button>
+      <div style="text-align:center;margin-top:10px;">
+        <span style="font-size:11px;color:var(--muted)">No account? </span>
+        <span style="font-size:11px;color:var(--green);cursor:pointer;font-weight:600;" onclick="toggleMode()">Create one</span>
+        &nbsp;·&nbsp;
+        <span style="font-size:11px;color:var(--muted);cursor:pointer;" onclick="forgotPassword()">Forgot password?</span>
+      </div>
     </div>
+
+    <!-- Reset password form (shown after clicking reset link in email) -->
+    <div id="reset-form" style="display:none">
+      <input class="login-input" type="password" id="reset-password" placeholder="New password (6+ characters)" />
+      <input class="login-input" type="password" id="reset-password2" placeholder="Confirm new password" />
+      <button class="login-btn" id="reset-btn" onclick="setNewPassword()">Set New Password</button>
+    </div>
+
     <div class="login-msg" id="login-msg"></div>
   </div>
 </div>
@@ -541,7 +553,32 @@ async function signUp() {
   else { msg.className='login-msg ok'; msg.textContent='✓ Account created! Check your email to confirm, then sign in.'; btn.disabled=false; }
 }
 
-async function forgotPassword() {
+async function setNewPassword() {
+  const p1 = document.getElementById('reset-password').value;
+  const p2 = document.getElementById('reset-password2').value;
+  const msg = document.getElementById('login-msg');
+  const btn = document.getElementById('reset-btn');
+  if (p1.length < 6) { msg.className='login-msg err'; msg.textContent='Password must be at least 6 characters.'; return; }
+  if (p1 !== p2) { msg.className='login-msg err'; msg.textContent='Passwords do not match.'; return; }
+  btn.disabled = true;
+  msg.className='login-msg'; msg.textContent='Updating…';
+  const { error } = await db.auth.updateUser({ password: p1 });
+  if (error) { msg.className='login-msg err'; msg.textContent=error.message; btn.disabled=false; }
+  else {
+    msg.className='login-msg ok'; msg.textContent='✓ Password updated! Signing you in…';
+    setTimeout(async () => {
+      document.getElementById('reset-form').style.display='none';
+      document.getElementById('login-form').style.display='block';
+      const { data: { session } } = await db.auth.getSession();
+      if (session && session.user) {
+        showApp(session.user);
+        appData = await loadData(currentWeek);
+        renderAllExercises();
+        showSync('saved', '✓ Ready');
+      }
+    }, 1500);
+  }
+}
   const email = document.getElementById('login-email').value.trim();
   const msg = document.getElementById('login-msg');
   if (!email) { msg.className='login-msg err'; msg.textContent='Enter your email above first.'; return; }
@@ -1232,6 +1269,15 @@ async function init() {
 
   // Listen for future auth changes (sign in / sign out)
   db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      // Show reset password form instead of loading the app
+      document.getElementById('login-overlay').classList.remove('hidden');
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('reset-form').style.display = 'block';
+      document.getElementById('login-subtitle').textContent = 'Set a new password for your account.';
+      document.getElementById('login-msg').textContent = '';
+      return;
+    }
     if (event === 'SIGNED_IN' && session && session.user) {
       showApp(session.user);
       showSync('loading', '⟳ Loading…');
