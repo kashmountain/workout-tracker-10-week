@@ -420,8 +420,6 @@ input{font-family:'Barlow',sans-serif;}
     </div>
     <div style="font-size:11px;color:var(--dim);margin-left:4px;" id="p3-week-desc">Rep targets 3–5 on main lifts · New accessories · Arms/core day added</div>
   </div>
-
-  <!-- Week 7 -->
   <div class="p3week active" id="p3panel-w7">
     <div class="dtabs">
       <div class="dtab d1 active" onclick="showDay('w7','d1')">Day 1 — Upper A</div>
@@ -436,8 +434,6 @@ input{font-family:'Barlow',sans-serif;}
     <div class="dpanel" id="w7-d4"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="w7-d4-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="w7-d4-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="w7-d4-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-w7-d4"></div></div>
     <div class="dpanel" id="w7-d5"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="w7-d5-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="w7-d5-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="w7-d5-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-w7-d5"></div></div>
   </div>
-
-  <!-- Week 8 -->
   <div class="p3week" id="p3panel-w8">
     <div class="ibox"><div>💡</div><div><strong>Same exercises as Week 7.</strong> Load progressions applied below.<ul class="dlist"><li>Bench 145 → <strong>150 lbs</strong></li><li>Squat 160 → <strong>165 lbs</strong></li><li>Row 110 → <strong>115 lbs</strong></li><li>Deadlift 125 → <strong>130 lbs</strong></li><li>Leg Press: 4 → <strong>5 sets</strong></li><li>Pull-ups: 4 → <strong>5 sets</strong></li></ul></div></div>
     <div class="dtabs">
@@ -453,8 +449,6 @@ input{font-family:'Barlow',sans-serif;}
     <div class="dpanel" id="w8-d4"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="w8-d4-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="w8-d4-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="w8-d4-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-w8-d4"></div></div>
     <div class="dpanel" id="w8-d5"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="w8-d5-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="w8-d5-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="w8-d5-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-w8-d5"></div></div>
   </div>
-
-  <!-- Week 9 -->
   <div class="p3week" id="p3panel-w9">
     <div class="dtabs">
       <div class="dtab d1 active" onclick="showDay('w9','d1')">Day 1 — Upper A</div>
@@ -469,8 +463,6 @@ input{font-family:'Barlow',sans-serif;}
     <div class="dpanel" id="w9-d4"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="w9-d4-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="w9-d4-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="w9-d4-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-w9-d4"></div></div>
     <div class="dpanel" id="w9-d5"><div class="day-summary"><div class="ds-item"><div class="ds-val green" id="w9-d5-complete">0</div><div class="ds-label">Sets Done</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val blue" id="w9-d5-total">0</div><div class="ds-label">Total Sets</div></div><div class="ds-divider"></div><div class="ds-item"><div class="ds-val amber" id="w9-d5-vol">0</div><div class="ds-label">Total Vol (lbs)</div></div></div><div id="exercises-w9-d5"></div></div>
   </div>
-
-  <!-- Week 10 -->
   <div class="p3week" id="p3panel-w10">
     <div class="pbox"><div class="pbox-t">🏆 Week 10 Targets</div><ul><li>Bench Press: <strong style="color:var(--amber)">160 lbs</strong> — near or above your Week 1 1RM</li><li>Squat: <strong style="color:var(--amber)">175 lbs</strong></li><li>Deadlift: <strong style="color:var(--amber)">140 lbs</strong> working weight — clean 5-rep set</li><li>Log all final weights as baseline for next cycle</li><li>Take progress photos vs Week 1</li></ul></div>
     <div class="dtabs">
@@ -654,7 +646,6 @@ async function saveData(week, data) {
   } catch(e) { showSync('error', '✗ Save failed'); console.error('Save exception:', e); }
 }
 
-// Customizations stored in week=0 slot
 async function loadCustomizations() {
   if (!currentUserId) return {};
   try {
@@ -727,7 +718,7 @@ const DEFAULT_EXERCISES = {
     {id:'p2d2_squat', name:'Barbell Back Squat', sets:4, reps:'4–6', rest:'2–3 min', suggest:155, compound:true},
     {id:'p2d2_hack',  name:'Hack Squat', note:'Replaces Leg Press', sets:3, reps:'10–12', rest:'90 sec', suggest:100, compound:false},
     {id:'p2d2_rdl',   name:'Romanian Deadlift', sets:3, reps:'8–10', rest:'2 min', suggest:100, compound:true},
-    {id:'p2d2_abduct', name:'Hip Abductor Machine', note:'Replaces lunges', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
+    {id:'p2d2_abduct',name:'Hip Abductor Machine', note:'Replaces lunges', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
     {id:'p2d2_ext',   name:'Leg Extension', sets:3, reps:'12–15', rest:'60 sec', suggest:55, compound:false},
     {id:'p2d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'12–15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
@@ -759,7 +750,7 @@ const DEFAULT_EXERCISES = {
   'w7-d2': [
     {id:'w7d2_squat', name:'Barbell Back Squat', sets:4, reps:'3–5', rest:'3 min', suggest:160, compound:true},
     {id:'w7d2_lp',    name:'Leg Press', sets:4, reps:'10–12', rest:'90 sec', suggest:'plate select', compound:false},
-    {id:'w7d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
+    {id:'w7d2_abduct',name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
     {id:'w7d2_ext',   name:'Leg Extension', sets:3, reps:'15', rest:'60 sec', suggest:55, compound:false},
     {id:'w7d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
@@ -798,7 +789,7 @@ const DEFAULT_EXERCISES = {
   'w8-d2': [
     {id:'w8d2_squat', name:'Barbell Back Squat', sets:4, reps:'3–5', rest:'3 min', suggest:165, compound:true},
     {id:'w8d2_lp',    name:'Leg Press', sets:5, reps:'10–12', rest:'90 sec', suggest:'plate select', compound:false},
-    {id:'w8d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
+    {id:'w8d2_abduct',name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
     {id:'w8d2_ext',   name:'Leg Extension', sets:3, reps:'15', rest:'60 sec', suggest:55, compound:false},
     {id:'w8d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
@@ -837,7 +828,7 @@ const DEFAULT_EXERCISES = {
   'w9-d2': [
     {id:'w9d2_squat', name:'Barbell Back Squat', sets:5, reps:'3–5', rest:'3 min', suggest:170, compound:true},
     {id:'w9d2_hack',  name:'Hack Squat', sets:4, reps:'10–12', rest:'90 sec', suggest:105, compound:false},
-    {id:'w9d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
+    {id:'w9d2_abduct',name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
     {id:'w9d2_ext',   name:'Leg Extension', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
     {id:'w9d2_calf',  name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
@@ -877,14 +868,14 @@ const DEFAULT_EXERCISES = {
   'w10-d2': [
     {id:'w10d2_squat',name:'Barbell Back Squat', sets:5, reps:'3–5', rest:'3 min', suggest:175, compound:true},
     {id:'w10d2_hack', name:'Hack Squat', sets:4, reps:'10–12', rest:'90 sec', suggest:105, compound:false},
-    {id:'w10d2_abduct', name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
+    {id:'w10d2_abduct',name:'Hip Abductor Machine', sets:3, reps:'12–15', rest:'60 sec', suggest:25, compound:false},
     {id:'w10d2_ext',  name:'Leg Extension', sets:4, reps:'15', rest:'60 sec', suggest:55, compound:false},
     {id:'w10d2_calf', name:'Leg Press Calf Raise', sets:4, reps:'15', rest:'60 sec', suggest:'plate select', compound:false},
   ],
   'w10-d3': [
     {id:'w10d3_row',  name:'Barbell Row', sets:5, reps:'3–5', rest:'3 min', suggest:125, compound:true},
     {id:'w10d3_pu',   name:'Pull-ups', sets:4, reps:'6–8', rest:'2 min', suggest:'BW', compound:false},
-    {id:'w10d3_dbrow', name:'Dumbbell Row', sets:3, reps:'10–12', rest:'90 sec', suggest:'37 ea.', compound:false},
+    {id:'w10d3_dbrow',name:'Dumbbell Row', sets:3, reps:'10–12', rest:'90 sec', suggest:'37 ea.', compound:false},
     {id:'w10d3_lpd',  name:'Lat Pulldown (Wide Grip)', sets:3, reps:'10–12', rest:'90 sec', suggest:87, compound:false},
     {id:'w10d3_fp',   name:'Face Pulls', sets:3, reps:'15', rest:'60 sec', suggest:35, compound:false},
     {id:'w10d3_ez',   name:'EZ Bar Curl', sets:3, reps:'10–12', rest:'60 sec', suggest:60, compound:false},
@@ -909,14 +900,16 @@ const DEFAULT_EXERCISES = {
 };
 
 // ─────────────────────────────────────────────
-// EXERCISES = merged view (defaults + customizations)
+// EXERCISES — merged view (defaults + per-week customizations)
+// customExercises shape: { 'w1-p1-d2': [...], 'w2-p1-d2': [...], ... }
+// Falls back to phase-level key then defaults.
 // ─────────────────────────────────────────────
-// customExercises stores per-dayKey arrays that fully replace the default
-// Shape: { 'p1-d1': [ {id, name, sets, reps, suggest, compound, note?}, ... ], ... }
 let customExercises = {};
 
+// FIX 1: getExercisesForDay now checks week-specific key first
 function getExercisesForDay(dayKey) {
-  return customExercises[dayKey] || DEFAULT_EXERCISES[dayKey] || [];
+  const weekKey = `w${currentWeek}-${dayKey}`;
+  return customExercises[weekKey] || customExercises[dayKey] || DEFAULT_EXERCISES[dayKey] || [];
 }
 
 // ─────────────────────────────────────────────
@@ -974,7 +967,8 @@ function calcNextWeight(ex, setData) {
 function buildExerciseCard(ex, dayKey) {
   const data = appData;
   const card = document.createElement('div');
-  const isCustom = !!(customExercises[dayKey]);
+  const weekKey = `w${currentWeek}-${dayKey}`;
+  const isCustom = !!(customExercises[weekKey] || customExercises[dayKey]);
   card.className = 'ex-card' + (isCustom ? ' custom-ex' : '');
   card.id = `card-${ex.id}`;
 
@@ -988,11 +982,6 @@ function buildExerciseCard(ex, dayKey) {
   }
   let statusClass = hasAnyInput ? (allComplete ? 'complete' : 'partial') : '';
   const suggestDisplay = typeof ex.suggest==='number' ? ex.suggest+' lbs' : ex.suggest;
-
-  // Check if this dayKey has been customized to show reset option
-  const dayIsCustomized = !!(customExercises[dayKey]);
-  const defaultDay = DEFAULT_EXERCISES[dayKey] || [];
-  const isThisExDefault = defaultDay.some(d => d.id === ex.id);
 
   card.innerHTML = `
     <div class="ex-header" onclick="toggleCard('${ex.id}')">
@@ -1031,13 +1020,10 @@ function buildExerciseCard(ex, dayKey) {
         </div>
       `).join('')}
       <div class="next-week-box" id="nwb-${ex.id}"></div>
-      <!-- EDIT BAR -->
       <div class="edit-bar">
         <button class="edit-btn edit-btn-pencil" onclick="toggleEditForm('${ex.id}','${dayKey}'); event.stopPropagation();">✏️ Edit</button>
         <button class="edit-btn edit-btn-remove" onclick="removeExercise('${ex.id}','${dayKey}'); event.stopPropagation();">✕ Remove</button>
-        ${dayIsCustomized && isThisExDefault ? '' : ''}
       </div>
-      <!-- EDIT FORM -->
       <div class="edit-form" id="editform-${ex.id}">
         <div class="edit-form-grid">
           <div class="edit-field full">
@@ -1064,7 +1050,7 @@ function buildExerciseCard(ex, dayKey) {
         <div class="edit-actions">
           <button class="edit-save-btn" onclick="saveExerciseEdit('${ex.id}','${dayKey}'); event.stopPropagation();">Save Changes</button>
           <button class="edit-cancel-btn" onclick="toggleEditForm('${ex.id}','${dayKey}'); event.stopPropagation();">Cancel</button>
-          <span class="edit-hint">Changes apply to this day across all weeks in this phase</span>
+          <span class="edit-hint">Changes apply to this week only</span>
         </div>
       </div>
     </div>
@@ -1075,7 +1061,6 @@ function buildExerciseCard(ex, dayKey) {
 function toggleEditForm(exId, dayKey) {
   const card = document.getElementById(`card-${exId}`);
   const isEditing = card.classList.toggle('editing');
-  // Ensure card is expanded when editing
   if(isEditing && !card.classList.contains('expanded')) {
     card.classList.add('expanded');
     const btn = document.getElementById(`btn-${exId}`);
@@ -1083,6 +1068,7 @@ function toggleEditForm(exId, dayKey) {
   }
 }
 
+// FIX 2: saveExerciseEdit now keys off week-specific key
 function saveExerciseEdit(exId, dayKey) {
   const nameEl = document.getElementById(`ef-name-${exId}`);
   const setsEl = document.getElementById(`ef-sets-${exId}`);
@@ -1098,9 +1084,12 @@ function saveExerciseEdit(exId, dayKey) {
   const newSuggest = isNaN(parseFloat(newSuggestRaw)) ? newSuggestRaw : parseFloat(newSuggestRaw);
   const newNote = noteEl.value.trim();
 
-  // Get current exercises for this day, fall back to defaults
-  const currentList = customExercises[dayKey]
-    ? [...customExercises[dayKey]]
+  // Use week-specific key so edits only affect the current week
+  const weekKey = `w${currentWeek}-${dayKey}`;
+  const currentList = customExercises[weekKey]
+    ? [...customExercises[weekKey]]
+    : customExercises[dayKey]
+    ? [...customExercises[dayKey]].map(e => ({...e}))
     : [...(DEFAULT_EXERCISES[dayKey] || [])].map(e => ({...e}));
 
   const idx = currentList.findIndex(e => e.id === exId);
@@ -1116,7 +1105,6 @@ function saveExerciseEdit(exId, dayKey) {
     note: newNote || undefined,
   };
 
-  // If sets changed, clean up any extra set data from appData
   if(newSets < oldSets) {
     for(let s = newSets; s < oldSets; s++) {
       delete appData[`${exId}_s${s}_wt`];
@@ -1124,26 +1112,27 @@ function saveExerciseEdit(exId, dayKey) {
     }
   }
 
-  customExercises[dayKey] = currentList;
+  // Save under week-specific key
+  customExercises[weekKey] = currentList;
   saveCustomizations();
-
-  // Re-render just this day
   rerenderDay(dayKey);
-  // Re-save workout data (in case set data was trimmed)
   debouncedSave();
 }
 
+// FIX 3: removeExercise now keys off week-specific key
 function removeExercise(exId, dayKey) {
   if(!confirm('Remove this exercise from the day?')) return;
 
-  const currentList = customExercises[dayKey]
-    ? [...customExercises[dayKey]]
+  const weekKey = `w${currentWeek}-${dayKey}`;
+  const currentList = customExercises[weekKey]
+    ? [...customExercises[weekKey]]
+    : customExercises[dayKey]
+    ? [...customExercises[dayKey]].map(e => ({...e}))
     : [...(DEFAULT_EXERCISES[dayKey] || [])].map(e => ({...e}));
 
   const newList = currentList.filter(e => e.id !== exId);
-  customExercises[dayKey] = newList;
+  customExercises[weekKey] = newList;
 
-  // Clean up appData for removed exercise
   Object.keys(appData).forEach(k => {
     if(k.startsWith(exId + '_')) delete appData[k];
   });
@@ -1153,12 +1142,15 @@ function removeExercise(exId, dayKey) {
   rerenderDay(dayKey);
 }
 
+// FIX 4: addExercise now keys off week-specific key
 function addExercise(dayKey) {
-  const currentList = customExercises[dayKey]
-    ? [...customExercises[dayKey]]
+  const weekKey = `w${currentWeek}-${dayKey}`;
+  const currentList = customExercises[weekKey]
+    ? [...customExercises[weekKey]]
+    : customExercises[dayKey]
+    ? [...customExercises[dayKey]].map(e => ({...e}))
     : [...(DEFAULT_EXERCISES[dayKey] || [])].map(e => ({...e}));
 
-  // Generate unique id
   const newId = `custom_${dayKey.replace(/[-]/g,'')}_${Date.now()}`;
   const newEx = {
     id: newId,
@@ -1173,11 +1165,10 @@ function addExercise(dayKey) {
   };
 
   currentList.push(newEx);
-  customExercises[dayKey] = currentList;
+  customExercises[weekKey] = currentList;
   saveCustomizations();
   rerenderDay(dayKey);
 
-  // Auto-expand the new card and open its edit form
   setTimeout(() => {
     const card = document.getElementById(`card-${newId}`);
     if(card) {
@@ -1201,9 +1192,8 @@ function rerenderDay(dayKey) {
     renderSetStatuses(ex, appData);
     renderNextWeekBox(ex, appData);
   });
-  // Re-add the add button
-  const addWrap = document.getElementById(`addex-${dayKey}`);
-  if(addWrap) addWrap.remove(); // remove old one
+  let addWrap = document.getElementById(`addex-${dayKey}`);
+  if(addWrap) addWrap.remove();
   const addDiv = document.createElement('div');
   addDiv.className = 'add-ex-wrap';
   addDiv.id = `addex-${dayKey}`;
@@ -1301,7 +1291,6 @@ function renderAllExercises() {
       renderSetStatuses(ex, appData);
       renderNextWeekBox(ex, appData);
     });
-    // Add "Add Exercise" button after container
     let addWrap = document.getElementById(`addex-${dayKey}`);
     if(addWrap) addWrap.remove();
     addWrap = document.createElement('div');
@@ -1321,7 +1310,6 @@ function toggleCard(exId) {
   const btn = document.getElementById(`btn-${exId}`);
   const expanded = card.classList.toggle('expanded');
   btn.textContent = expanded ? '−' : '+';
-  // Close edit form if collapsing
   if(!expanded) card.classList.remove('editing');
 }
 
@@ -1458,7 +1446,6 @@ async function importData(event) {
         const weekNum=parseInt(weekKey.replace('week_',''));
         if(weekNum>=1&&weekNum<=10){ await saveData(weekNum,weekData); imported++; }
       }
-      // Restore customizations if present
       if(payload.customizations) {
         customExercises = payload.customizations;
         await saveCustomizations();
