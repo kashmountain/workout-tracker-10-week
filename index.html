@@ -191,15 +191,15 @@ input{font-family:'Barlow',sans-serif;}
     <div id="login-form">
       <input type="email" id="login-email" class="login-input" placeholder="Email">
       <input type="password" id="login-password" class="login-input" placeholder="Password">
-      <button id="login-btn" class="login-btn">Sign In</button>
-      <button id="signup-btn" class="login-btn" style="margin-top:6px;background:var(--blue);">Create Account</button>
-      <button id="forgot-btn" class="login-btn" style="margin-top:6px;background:var(--s2);color:var(--text);font-weight:500;">Forgot Password</button>
+      <button id="login-btn" class="login-btn" onclick="handleLogin()">Sign In</button>
+      <button id="signup-btn" class="login-btn" style="margin-top:6px;background:var(--blue);" onclick="handleSignup()">Create Account</button>
+      <button id="forgot-btn" class="login-btn" style="margin-top:6px;background:var(--s2);color:var(--text);font-weight:500;" onclick="handleForgotPassword()">Forgot Password</button>
       <div id="login-msg" class="login-msg"></div>
     </div>
 
     <div id="reset-form" style="display:none;">
       <input type="password" id="new-password" class="login-input" placeholder="New Password">
-      <button id="reset-submit-btn" class="login-btn">Update Password</button>
+      <button id="reset-submit-btn" class="login-btn" onclick="handleResetPassword()">Update Password</button>
       <div id="reset-msg" class="login-msg"></div>
     </div>
   </div>
@@ -216,7 +216,7 @@ input{font-family:'Barlow',sans-serif;}
   </div>
   <div class="hdr-right">
     <div class="login-user" id="user-email-display" style="display:none;"></div>
-    <button class="logout-btn" id="logout-btn" style="display:none;">Sign Out</button>
+    <button class="logout-btn" id="logout-btn" style="display:none;" onclick="handleLogout()">Sign Out</button>
     <div class="week-selector">
       <button class="week-btn" onclick="changeWeek(-1)">◀</button>
       <div class="week-label" id="week-label">Week 1</div>
@@ -461,7 +461,10 @@ async function loadData(week) {
   if (!currentUserId) return {};
   try {
     const { data, error } = await db.from('workout_data').select('*').eq('user_id', currentUserId).eq('week', week).single();
-    if (error && error.code !== 'PGRST116') throw error;
+    if (error && error.code !== 'PGRST116') {
+      console.error('Load error:', error);
+      return {};
+    }
     return data ? data.week_data : {};
   } catch (err) {
     console.error('Load error:', err);
@@ -486,7 +489,10 @@ async function loadCustomizations() {
   if (!currentUserId) return {};
   try {
     const { data, error } = await db.from('customizations').select('*').eq('user_id', currentUserId).single();
-    if (error && error.code !== 'PGRST116') throw error;
+    if (error && error.code !== 'PGRST116') {
+      console.error('Load customizations error:', error);
+      return {};
+    }
     return data ? data.custom_exercises : {};
   } catch (err) {
     console.error('Load customizations error:', err);
@@ -514,7 +520,7 @@ function showSync(type, msg) {
 // ─────────────────────────────────────────────
 // LOGIN/AUTH
 // ─────────────────────────────────────────────
-document.getElementById('login-btn').addEventListener('click', async () => {
+async function handleLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const msgEl = document.getElementById('login-msg');
@@ -525,9 +531,9 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   msgEl.className = 'login-msg';
   const { error } = await db.auth.signInWithPassword({ email, password });
   if (error) { msgEl.textContent = error.message; msgEl.className = 'login-msg err'; btn.disabled = false; } else { msgEl.textContent = 'Signed in!'; msgEl.className = 'login-msg ok'; }
-});
+}
 
-document.getElementById('signup-btn').addEventListener('click', async () => {
+async function handleSignup() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const msgEl = document.getElementById('login-msg');
@@ -539,9 +545,9 @@ document.getElementById('signup-btn').addEventListener('click', async () => {
   msgEl.className = 'login-msg';
   const { error } = await db.auth.signUp({ email, password });
   if (error) { msgEl.textContent = error.message; msgEl.className = 'login-msg err'; btn.disabled = false; } else { msgEl.textContent = 'Account created! Check your email to verify.'; msgEl.className = 'login-msg ok'; }
-});
+}
 
-document.getElementById('forgot-btn').addEventListener('click', async () => {
+async function handleForgotPassword() {
   const email = document.getElementById('login-email').value.trim();
   const msgEl = document.getElementById('login-msg');
   if (!email) { msgEl.textContent = 'Enter your email to reset password.'; msgEl.className = 'login-msg err'; return; }
@@ -549,9 +555,9 @@ document.getElementById('forgot-btn').addEventListener('click', async () => {
   msgEl.className = 'login-msg';
   const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
   if (error) { msgEl.textContent = error.message; msgEl.className = 'login-msg err'; } else { msgEl.textContent = 'Password reset email sent! Check your inbox.'; msgEl.className = 'login-msg ok'; }
-});
+}
 
-document.getElementById('reset-submit-btn').addEventListener('click', async () => {
+async function handleResetPassword() {
   const newPassword = document.getElementById('new-password').value;
   const msgEl = document.getElementById('reset-msg');
   const btn = document.getElementById('reset-submit-btn');
@@ -561,11 +567,11 @@ document.getElementById('reset-submit-btn').addEventListener('click', async () =
   msgEl.className = 'login-msg';
   const { error } = await db.auth.updateUser({ password: newPassword });
   if (error) { msgEl.textContent = error.message; msgEl.className = 'login-msg err'; btn.disabled = false; } else { msgEl.textContent = 'Password updated successfully!'; msgEl.className = 'login-msg ok'; }
-});
+}
 
-document.getElementById('logout-btn').addEventListener('click', async () => {
+async function handleLogout() {
   await db.auth.signOut();
-});
+}
 
 function showApp(user) {
   document.getElementById('login-overlay').classList.add('hidden');
@@ -1049,10 +1055,15 @@ async function init() {
         currentUserId = session.user.id;
         showApp(session.user);
         showSync('loading', '⟳ Loading…');
-        customExercises = await loadCustomizations();
-        appData = await loadData(currentWeek);
-        renderAllExercises();
-        showSync('saved', '✓ Ready');
+        try {
+          customExercises = await loadCustomizations();
+          appData = await loadData(currentWeek);
+          renderAllExercises();
+          showSync('saved', '✓ Ready');
+        } catch (err) {
+          console.error('Init error:', err);
+          showSync('error', '✗ Load failed');
+        }
       }
     });
     return;
@@ -1064,10 +1075,18 @@ async function init() {
     currentUserId = session.user.id;
     showApp(session.user);
     showSync('loading', '⟳ Loading…');
-    customExercises = await loadCustomizations();
-    appData = await loadData(currentWeek);
-    renderAllExercises();
-    showSync('saved', '✓ Ready');
+    try {
+      customExercises = await loadCustomizations();
+      appData = await loadData(currentWeek);
+      renderAllExercises();
+      showSync('saved', '✓ Ready');
+    } catch (err) {
+      console.error('Init error:', err);
+      customExercises = {};
+      appData = {};
+      renderAllExercises();
+      showSync('saved', '✓ Ready');
+    }
   } else {
     document.getElementById('login-overlay').classList.remove('hidden');
     showSync('saved', '');
@@ -1077,10 +1096,18 @@ async function init() {
         currentUserId = session.user.id;
         showApp(session.user);
         showSync('loading', '⟳ Loading…');
-        customExercises = await loadCustomizations();
-        appData = await loadData(currentWeek);
-        renderAllExercises();
-        showSync('saved', '✓ Ready');
+        try {
+          customExercises = await loadCustomizations();
+          appData = await loadData(currentWeek);
+          renderAllExercises();
+          showSync('saved', '✓ Ready');
+        } catch (err) {
+          console.error('Init error:', err);
+          customExercises = {};
+          appData = {};
+          renderAllExercises();
+          showSync('saved', '✓ Ready');
+        }
       }
       if (event === 'SIGNED_OUT') {
         currentUserId = null;
