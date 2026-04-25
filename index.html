@@ -1333,7 +1333,7 @@ function debouncedSave() {
 function toggleWeightMode(event, exId, dayKey, mode) {
   event.stopPropagation();
   const exKey = `${exId}`;
-  const card = document.getElementById(`ex-${exId}`);
+  const card = document.getElementById(`card-${exId}`);
   if (!card) return;
   
   const toggle = card.querySelector('.weight-mode-toggle');
